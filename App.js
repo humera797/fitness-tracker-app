@@ -1,0 +1,25 @@
+import React from 'react';
+import { NavigationContainer } from '@react-navigation/native';
+import { createStackNavigator } from '@react-navigation/stack';
+
+import WelcomeScreen from './screens/WelcomeScreen';
+import LoginScreen from './screens/LoginScreen';
+import SignupScreen from './screens/SignupScreen';
+import UserDataScreen1 from './screens/UserDataScreen1';
+import UserDataScreen2 from './screens/UserDataScreen2';
+
+const Stack = createStackNavigator();
+
+export default function App() {
+  return (
+    <NavigationContainer>
+      <Stack.Navigator screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="Welcome" component={WelcomeScreen} />
+        <Stack.Screen name="Login" component={LoginScreen} />
+        <Stack.Screen name="Signup" component={SignupScreen} />
+        <Stack.Screen name="UserData1" component={UserDataScreen1} />
+        <Stack.Screen name="UserData2" component={UserDataScreen2} />
+      </Stack.Navigator>
+    </NavigationContainer>
+  );
+}
