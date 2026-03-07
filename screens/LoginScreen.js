@@ -1,8 +1,5 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import AppButton from '../components/AppButton';
-import AppInput from '../components/AppInput';
-import App from '../App';
 
 export default function LoginScreen({ navigation }) {
     return (
