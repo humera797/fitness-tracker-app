@@ -1,6 +1,7 @@
+// WelcomeScreen - The first screen user see when they open the app, with options to navigate to Login or Signup
+
 import React from 'react';
-import { View, Text, StyleSheet, ImageBackground } from 'react-native';
-import AppButton from '../components/AppButton';
+import { View, Text, StyleSheet, ImageBackground, TouchableOpacity } from 'react-native';
 
 export default function WelcomeScreen({ navigation }) {
     return (
@@ -15,17 +16,21 @@ export default function WelcomeScreen({ navigation }) {
                 <View style={styles.spacer} />
 
                 <View style={styles.bottomButtons}>
-                    <AppButton
-                        title="Login"
-                        type="secondary"
-                        onPress={() => navigation.navigate('Login')}
-                    />
 
-                    <AppButton
-                        title="Signup"
-                        type="secondary"
+                    <TouchableOpacity
+                        style={styles.button}
+                        onPress={() => navigation.navigate('Login')}
+                    >
+                        <Text style={styles.buttonText}>Login</Text>
+                    </TouchableOpacity>
+
+                    <TouchableOpacity
+                        style={styles.button}
                         onPress={() => navigation.navigate('Signup')}
-                    />
+                    >
+                        <Text style={styles.buttonText}>Signup</Text>
+                    </TouchableOpacity>
+
                 </View>
 
             </View>
@@ -56,7 +61,22 @@ const styles = StyleSheet.create({
     },
 
     bottomButtons: {
-        marginBottom: 40,
-        color: '#C3B2AE',
+        marginBottom: 50,
     },
+
+    button: {
+        backgroundColor: '#C3B2AE',
+        padding: 15,
+        borderRadius: 10,
+        marginBottom: 10,
+        alignItems: 'center',
+        width: '75%',
+        alignSelf: 'center',
+    },
+
+    buttonText: {
+        color: 'white',
+        fontSize: 16,
+        fontWeight: '400',
+    }
 });
