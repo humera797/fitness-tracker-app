@@ -1,3 +1,5 @@
+// Login Screen - Allows users to log in to their account
+
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 
