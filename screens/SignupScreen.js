@@ -1,7 +1,7 @@
+// Signup screen - Allows users to create a new account by entering their details
+
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import AppButton from '../components/AppButton';
-import AppInput from '../components/AppInput';
 
 export default function SignupScreen({ navigation }) {
   return (
