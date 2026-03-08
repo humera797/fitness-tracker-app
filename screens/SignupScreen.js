@@ -1,64 +1,136 @@
 // Signup screen - Allows users to create a new account by entering their details
 
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, TextInput } from 'react-native';
 
 export default function SignupScreen({ navigation }) {
-  return (
-    <View style={styles.container}>
-      <TouchableOpacity
-        onPress={() => navigation.goBack()}
-        style={styles.backButton}>
-        <Text style={styles.backText}>← Back</Text>
-      </TouchableOpacity>
+    return (
+        <View style={styles.container}>
+            <TouchableOpacity
+                onPress={() => navigation.goBack()}
+                style={styles.backButton}>
+                <Text style={styles.backText}>← Back</Text>
+            </TouchableOpacity>
 
-      <Text style={styles.header}>Welcome, lets get started</Text>
+            <Text style={styles.header}>Welcome, lets get started</Text>
 
-      <Text style={styles.label}>Full Name</Text>
-      <AppInput placeholder="enter full name" />
+            <Text style={styles.label}>Full Name</Text>
+            <TextInput
+                style={styles.input}
+                placeholder="enter full name"
+            />
 
-      <Text style={styles.label}>Email</Text>
-      <AppInput placeholder="enter email" />
+            <Text style={styles.label}>Email</Text>
+            <TextInput
+                style={styles.input}
+                placeholder="enter email"
+            />
 
-      <Text style={styles.label}>Password</Text>
-      <AppInput placeholder="create a password" secureTextEntry />
+            <Text style={styles.label}>Password</Text>
+            <TextInput
+                style={styles.input}
+                placeholder="create a password"
+                secureTextEntry
+            />
 
-      <Text style={styles.label}>Confirm Password</Text>
-      <AppInput placeholder="confirm your password" secureTextEntry />
+            <Text style={styles.label}>Confirm Password</Text>
+            <TextInput
+                style={styles.input}
+                placeholder="confirm your password"
+                secureTextEntry
+            />
 
-      <AppButton title="Sign up" onPress={() => navigation.replace("UserData1")}/>
-    </View>
-  );
+            <TouchableOpacity
+                style={styles.button}
+                onPress={() => navigation.replace("UserData1")}
+            >
+                <Text style={styles.buttonText}>Sign up</Text>
+            </TouchableOpacity>
+
+            <View style={styles.bottomtextcontainer} />
+            <Text style={styles.Text}>Already have an account?</Text>
+            <TouchableOpacity onPress={() => navigation.navigate('Login')}>
+                <Text style={styles.loginText}>Login</Text>
+            </TouchableOpacity>
+        </View>
+    );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: 'white',
-    padding: 30,
-    justifyContent: 'center',
-  },
+    container: {
+        flex: 1,
+        backgroundColor: 'white',
+        padding: 30,
+        justifyContent: 'center',
+    },
 
-  header: {
-    fontSize: 22,
-    fontWeight: '600',
-    marginBottom: 25,
-  },
+    header: {
+        fontSize: 22,
+        fontWeight: '600',
+        marginBottom: 25,
+    },
 
-  label: {
-    marginTop: 8,
-    fontSize: 14,
-    fontWeight: '500',
-  },
+    bottomtextcontainer: {
+        marginTop: 20,
+        flexDirection: 'row',
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    Text: { 
+        fontSize: 13,
+        fontWeight: '400',
+        marginLeft: 65, 
+    },
 
-  backButton: {
-    position: 'absolute',
-    top: 50,
-    left: 20,
-  },
+    loginText: {   
+        color: '#a18d88',
+        fontSize: 14,
+        fontWeight: '600',
+        textDecorationLine: 'underline',
+        marginLeft: 225,  
+        marginTop: -17,
+    },
 
-  backText: {
-    fontSize: 16,
-    fontWeight: '500',
-  }
+    input: {
+        borderWidth: 1,
+        borderColor: '#ccc',
+        borderRadius: 8,
+        padding: 12,
+        marginTop: 8,
+        backgroundColor: '#f0eded',
+    },
+
+    button: {
+        backgroundColor: '#A79692',
+        padding: 15,
+        borderRadius: 10,
+        marginTop: 20,
+        alignItems: 'center',
+        width: '75%',
+        alignSelf: 'center',
+    },
+
+    buttonText: {
+        color: 'white',
+        fontSize: 16,
+        fontWeight: '600',
+    },
+    label: {
+        marginTop: 15,
+        fontSize: 15,
+        fontWeight: '450',
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+
+    backButton: {
+        position: 'absolute',
+        top: 50,
+        left: 20,
+    },
+
+    backText: {
+        fontSize: 16,
+        fontWeight: '500',
+    }
 });
