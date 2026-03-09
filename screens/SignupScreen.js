@@ -2,9 +2,32 @@
 
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, TextInput } from 'react-native';
+import { createUserWithEmailAndPassword } from 'firebase/auth';
+import { auth } from '../firebase';
 
 export default function SignupScreen({ navigation }) {
+
+    const [email, setEmail] = React.useState('');
+    const [password, setPassword] = React.useState('');
+    const [confirmPassword, setConfirmPassword] = React.useState('');
+
+    const handleSignup = () => {
+        if (password !== confirmPassword) {
+            alert("Oops!Passwords do not match");
+            return;
+        }
+        createUserWithEmailAndPassword(auth, email, password)
+            .then((userCredential) => {
+                const user = userCredential.user;
+
+                navigation.replace("UserData1");
+            })
+            .catch((error) => {
+                alert("Unable to create account! Please try again.");
+            });
+    };
     return (
+
         <View style={styles.container}>
             <TouchableOpacity
                 onPress={() => navigation.goBack()}
@@ -24,6 +47,7 @@ export default function SignupScreen({ navigation }) {
             <TextInput
                 style={styles.input}
                 placeholder="enter email"
+                onChangeText={setEmail}
             />
 
             <Text style={styles.label}>Password</Text>
@@ -31,6 +55,7 @@ export default function SignupScreen({ navigation }) {
                 style={styles.input}
                 placeholder="create a password"
                 secureTextEntry
+                onChangeText={setPassword}
             />
 
             <Text style={styles.label}>Confirm Password</Text>
@@ -38,16 +63,19 @@ export default function SignupScreen({ navigation }) {
                 style={styles.input}
                 placeholder="confirm your password"
                 secureTextEntry
+                onChangeText={setConfirmPassword}
             />
 
             <TouchableOpacity
                 style={styles.button}
-                onPress={() => navigation.replace("UserData1")}
+                onPress={handleSignup}
+
             >
                 <Text style={styles.buttonText}>Sign up</Text>
             </TouchableOpacity>
 
             <View style={styles.bottomtextcontainer} />
+
             <Text style={styles.Text}>Already have an account?</Text>
             <TouchableOpacity onPress={() => navigation.navigate('Login')}>
                 <Text style={styles.loginText}>Login</Text>
@@ -76,18 +104,19 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
     },
-    Text: { 
+
+    Text: {
         fontSize: 13,
         fontWeight: '400',
-        marginLeft: 65, 
+        marginLeft: 65,
     },
 
-    loginText: {   
+    loginText: {
         color: '#a18d88',
         fontSize: 14,
         fontWeight: '600',
         textDecorationLine: 'underline',
-        marginLeft: 225,  
+        marginLeft: 225,
         marginTop: -17,
     },
 
