@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Calendar } from 'react-native-calendars';
 
@@ -9,27 +9,128 @@ export default function HomeScreen() {
 
     const [selectedDate, setSelectedData] = useState("");
 
+    const [calories, setCalories] = useState(0);
+    const [minutes, setMinutes] = useState(0);
+    const [water, setWater] = useState(0);
+    const [workouts, setWorkouts] = useState(0);
+
     return (
         <SafeAreaView style={styles.container}>
 
-            <Text style={styles.greeting}>Hey {username},</Text>
-            
-            <Text style={styles.subgreeting}>Lets workout</Text>
+            <ScrollView>
 
-            <View style={styles.calendarCard}>
+                <Text style={styles.greeting}>Hey {username},</Text>
 
-                <Calendar
-                    onDayPress={(day) => {
-                        setSelectedData(day.dateString);
-                    }}
+                <Text style={styles.subgreeting}>Lets workout</Text>
 
-                    markedDates={{
-                        [selectedDate]: { selected: true, marked: true }
-                    }}
+                <View style={styles.calendarCard}>
 
-                    theme={styles.calendarTheme}
-                />
-            </View>
+                    <Calendar
+                        onDayPress={(day) => {
+                            setSelectedData(day.dateString);
+                        }}
+
+                        markedDates={{
+                            [selectedDate]: { selected: true, marked: true }
+                        }}
+
+                        theme={styles.calendarTheme}
+                    />
+                </View>
+
+                <Text style={styles.sectionTitle}>Today's Activity</Text>
+
+                <View style={styles.activityCard}>
+                    <Text>Calories burned</Text>
+
+                    <View style={styles.counter}>
+                        <TouchableOpacity
+                            onPress={() => setCalories(Math.max(0, calories - 5))}
+                            style={styles.circle}
+                        >
+                            <Text>-</Text>
+                        </TouchableOpacity>
+
+                        <Text>{calories}</Text>
+
+                        <TouchableOpacity
+                            onPress={() => setCalories(calories + 5)}
+                            style={styles.circle}
+                        >
+                            <Text>+</Text>
+                        </TouchableOpacity>
+                    </View>
+                </View>
+
+
+                <View style={styles.activityCard}>
+                    <Text>Active minutes</Text>
+
+                    <View style={styles.counter}>
+                        <TouchableOpacity
+                            onPress={() => setMinutes(Math.max(0, minutes - 5))}
+                            style={styles.circle}
+                        >
+                            <Text>-</Text>
+                        </TouchableOpacity>
+
+                        <Text>{minutes}</Text>
+
+                        <TouchableOpacity
+                            onPress={() => setMinutes(minutes + 5)}
+                            style={styles.circle}
+                        >
+                            <Text>+</Text>
+                        </TouchableOpacity>
+                    </View>
+                </View>
+
+
+                <View style={styles.activityCard}>
+                    <Text>water intake</Text>
+
+                    <View style={styles.counter}>
+                        <TouchableOpacity
+                            onPress={() => setWater(Math.max(0, water - 1))}
+                            style={styles.circle}
+                        >
+                            <Text>-</Text>
+                        </TouchableOpacity>
+
+                        <Text>{water}</Text>
+
+                        <TouchableOpacity
+                            onPress={() => setWater(water + 1)}
+                            style={styles.circle}
+                        >
+                            <Text>+</Text>
+                        </TouchableOpacity>
+                    </View>
+                </View>
+
+
+                <View style={styles.activityCard}>
+                    <Text>workouts logged</Text>
+
+                    <View style={styles.counter}>
+                        <TouchableOpacity
+                            onPress={() => setWorkouts(Math.max(0, workouts - 1))}
+                            style={styles.circle}
+                        >
+                            <Text>-</Text>
+                        </TouchableOpacity>
+
+                        <Text>{workouts}</Text>
+
+                        <TouchableOpacity
+                            onPress={() => setWorkouts(workouts + 1)}
+                            style={styles.circle}
+                        >
+                            <Text>+</Text>
+                        </TouchableOpacity>
+                    </View>
+                </View>
+            </ScrollView>
         </SafeAreaView>
     );
 }
@@ -44,15 +145,14 @@ const styles = StyleSheet.create({
         fontSize: 25,
         fontWeight: '500',
         position: 'absolute',
-        top: 65,
-        left: 30,
+        left: 8,
     },
     subgreeting: {
         fontSize: 18,
         fontWeight: '400',
         position: 'absolute',
-        top: 100,
-        left: 33,
+        top: 30,
+        left: 10,
     },
     calendarCard: {
         backgroundColor: '#ffffff',
@@ -60,6 +160,7 @@ const styles = StyleSheet.create({
         borderRadius: 12,
         padding: 10,
         marginBottom: 250,
+        top: 70,
     },
     calendarTheme: {
         selectedDayBackgroundColor: "#A79692",
@@ -68,4 +169,38 @@ const styles = StyleSheet.create({
         arrowColor: "#C3B2AE",
         monthTextColor: "#000000",
     },
+
+    sectionTitle: {
+        fontSize: 20,
+        fontWeight: '500',
+        marginBottom: 15,
+        bottom: 169,
+        left: 5
+    },
+
+    activityCard: {
+        backgroundColor: '#ffffff',
+        padding: 15,
+        borderRadius: 12,
+        marginBottom: 15,
+        bottom: 170,
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+    },
+
+    counter: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 15
+    },
+
+    circle: {
+        width: 30,
+        height: 30,
+        backgroundColor: '#EAEAEA',
+        justifyContent: 'center',
+        alignItems: 'center',
+        borderRadius: 15
+    }
 });
