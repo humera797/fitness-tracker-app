@@ -1,11 +1,14 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
+import { auth, db } from '../firebase';
+import { doc, setDoc } from 'firebase/firestore';
 
-export default function UserDataScreen1({ navigation }) {
+export default function UserDataScreen2({ navigation, route }) {
+  const { age, height, weight } = route.params;
 
-  const [age, setActivityLevel] = useState('');
-  const [gender, setTargetGoal] = useState('');
-  const [height, setTargetArea] = useState('');
+  const [activitylevel, setActivityLevel] = useState('');
+  const [targetgoal, setTargetGoal] = useState('');
+  const [targetarea, setTargetArea] = useState('');
 
   const [activeDropdown, setActiveDropdown] = useState(null);
   const renderDropdown = (label, value, setValue, options, type) => (
@@ -54,10 +57,51 @@ export default function UserDataScreen1({ navigation }) {
     </View>
   );
 
+  // calculating BMI
+  const calculateBMI = (weight, height) => {
+    const heightInMeters = height / 100;
+    return (weight / (heightInMeters * heightInMeters)).toFixed(1);
+  };
+
+  // Rule based workout plan recommendation
+  const getWorkoutPlan = (goal, bmi) => {
+    if (goal === "Lose Weight" && bmi >= 25) return "Fat Loss Workout";
+    if (goal === "Gain Muscle") return "Strength Training Plan";
+    if (goal === "Maintain Fitness") return "Balanced Fitness Plan";
+    return "General Fitness Plan";
+  };
+
+  //  save user data to Firestore
+  const saveUserData = async () => {
+    console.log("Button pressed");
+    
+    const user = auth.currentUser;
+    console.log("USER:", user);
+
+    if (!user) {
+      console.error("No user logged in.");
+      return;
+    }
+
+    const bmi = calculateBMI(Number(weight), Number(height));
+    const recommendedPlan = getWorkoutPlan(targetgoal, bmi);
+
+    await setDoc(doc(db, "users", user.uid), {
+      age,
+      height,
+      weight,
+      activitylevel,
+      targetgoal,
+      targetarea,
+      bmi,
+      recommendedPlan
+    });
+
+    navigation.navigate("Home");
+  };
+
   return (
     <View style={styles.container}>
-
-      <View style={styles.formWrapper}></View>
 
       <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
         <Text style={styles.backText}>← Back</Text>
@@ -67,7 +111,7 @@ export default function UserDataScreen1({ navigation }) {
 
       {renderDropdown(
         'Activity Level',
-        age,
+        activitylevel,
         setActivityLevel,
         ['Sedentary (Not Very Active)', 'Lightly Active', 'Moderately Active', 'Very Active'],
         'activityLevel'
@@ -75,7 +119,7 @@ export default function UserDataScreen1({ navigation }) {
 
       {renderDropdown(
         'Target Goal',
-        gender,
+        targetgoal,
         setTargetGoal,
         ['Lose Weight', 'Maintain Weight', 'Gain Weight'],
         'targetGoal'
@@ -83,7 +127,7 @@ export default function UserDataScreen1({ navigation }) {
 
       {renderDropdown(
         'Target Area',
-        height,
+        targetarea,
         setTargetArea,
         ['Full Body', 'Abs & core', 'Arms & back', 'Legs', 'Glutes'],
         'targetArea'
@@ -91,7 +135,7 @@ export default function UserDataScreen1({ navigation }) {
 
       <TouchableOpacity
         style={styles.button}
-        onPress={() => navigation.navigate('Home')}
+        onPress={saveUserData}
       >
         <Text style={styles.buttonText}>All Set!</Text>
       </TouchableOpacity>

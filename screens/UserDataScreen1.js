@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Modal, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 
 export default function UserDataScreen1({ navigation }) {
 
@@ -92,7 +92,11 @@ export default function UserDataScreen1({ navigation }) {
 
       <TouchableOpacity
         style={styles.button}
-        onPress={() => navigation.navigate('UserData2')}
+        onPress={() => navigation.navigate('UserData2', {
+          age: age,
+          height: height,
+          weight: weight,
+        })}
       >
         <Text style={styles.buttonText}>Next</Text>
       </TouchableOpacity>
