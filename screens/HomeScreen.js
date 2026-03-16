@@ -1,3 +1,5 @@
+// Home Screen - Displays user's fitness data and allows them to log activities
+
 import { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -5,6 +7,7 @@ import { Calendar } from 'react-native-calendars';
 
 export default function HomeScreen() {
 
+    // TODO: Fetch user data from firebase and display it here later
     const username = "Humera";
 
     const [selectedDate, setSelectedData] = useState("");
@@ -21,7 +24,7 @@ export default function HomeScreen() {
 
                 <Text style={styles.greeting}>Hey {username},</Text>
 
-                <Text style={styles.subgreeting}>Lets workout</Text>
+                <Text style={styles.subgreeting}>Let's workout</Text>
 
                 <View style={styles.calendarCard}>
 
@@ -62,7 +65,6 @@ export default function HomeScreen() {
                     </View>
                 </View>
 
-
                 <View style={styles.activityCard}>
                     <Text>Active minutes</Text>
 
@@ -84,7 +86,6 @@ export default function HomeScreen() {
                         </TouchableOpacity>
                     </View>
                 </View>
-
 
                 <View style={styles.activityCard}>
                     <Text>water intake</Text>
@@ -108,7 +109,6 @@ export default function HomeScreen() {
                     </View>
                 </View>
 
-
                 <View style={styles.activityCard}>
                     <Text>workouts logged</Text>
 
@@ -129,6 +129,20 @@ export default function HomeScreen() {
                             <Text>+</Text>
                         </TouchableOpacity>
                     </View>
+                </View>
+
+                <Text style={styles.sectionTitle}>Today's Plan</Text>
+
+                <View style={styles.planCard}>
+                    <Text style={styles.planTitle}>Plan</Text>
+
+                    <Text style={styles.planDetails}>Duration: 30 minutes</Text>
+
+                    <Text style={styles.planDetails}>Exercises: 6</Text>
+
+                    <TouchableOpacity style={styles.startButton}>
+                        <Text style={styles.startText}>Start Workout</Text>
+                    </TouchableOpacity>
                 </View>
             </ScrollView>
         </SafeAreaView>
@@ -174,7 +188,7 @@ const styles = StyleSheet.create({
         fontSize: 20,
         fontWeight: '500',
         marginBottom: 15,
-        bottom: 169,
+        bottom: 170,
         left: 5
     },
 
@@ -202,5 +216,33 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         borderRadius: 15
+    },
+    planCard: {
+        backgroundColor: '#ffffff',
+        padding: 15,
+        borderRadius: 15,
+        marginBottom: 15,
+        bottom: 170,
+    },
+    planTitle: {
+        fontSize: 18,
+        fontWeight: '500',
+        marginBottom: 10,
+    },
+    planDetails: {
+        fontSize: 16,
+        fontWeight: '400',
+        marginBottom: 12,
+    },
+    startButton: {
+        backgroundColor: '#A79692',
+        padding: 10,
+        borderRadius: 12,
+        alignItems: 'center',
+        marginTop: 10,
+    },
+    startText: {
+        color: '#ffffff',
+        fontWeight: '500',
     }
 });
