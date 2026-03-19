@@ -10,6 +10,7 @@ import UserDataScreen1 from './screens/UserDataScreen1';
 import UserDataScreen2 from './screens/UserDataScreen2';
 import HomeScreen from './screens/HomeScreen';
 import WorkoutScreen from './screens/WorkoutScreen';
+import FiltersScreen from './screens/FiltersScreen';
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -24,6 +25,7 @@ export default function App() {
         <Stack.Screen name="UserData1" component={UserDataScreen1} />
         <Stack.Screen name="UserData2" component={UserDataScreen2} />
         <Stack.Screen name="Home" component={HomeTabs} />
+        <Stack.Screen name="Filter" component={FiltersScreen}/>
       </Stack.Navigator>
     </NavigationContainer>
   );
