@@ -12,6 +12,8 @@ import HomeScreen from './screens/HomeScreen';
 import WorkoutScreen from './screens/WorkoutScreen';
 import FiltersScreen from './screens/FiltersScreen';
 import UserProfileScreen from './screens/UserProfileScreen';
+import ExerciseListScreen from './screens/ExerciseListScreen';
+import DetailScreen from './screens/DetailScreen';
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -27,6 +29,8 @@ export default function App() {
         <Stack.Screen name="UserData2" component={UserDataScreen2} />
         <Stack.Screen name="Home" component={HomeTabs} />
         <Stack.Screen name="Filter" component={FiltersScreen} />
+        <Stack.Screen name="ExerciseList" component={ExerciseListScreen} />
+        <Stack.Screen name="DetailScreen" component={DetailScreen}/>
       </Stack.Navigator>
     </NavigationContainer>
   );

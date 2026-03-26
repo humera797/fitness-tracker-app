@@ -6,13 +6,13 @@ import Feather from '@expo/vector-icons/Feather';
 export default function WorkoutScreen({ navigation }) {
 
     const recommended = [
-        { id: '1', title: '15 min full body HIT' },
-        { id: '2', title: '20 min beginner friendly' },
-        { id: '3', title: '30 minutes full body HIT' },
+        { id: '1', title: '35 min full body HIT' },
+        { id: '2', title: '40 min beginner friendly' },
+        { id: '3', title: '50 minutes full body HIT' },
     ];
 
     const targetAreas = [
-        { id: '1', name: 'FULL BODY' },
+        { id: '1', name: 'FULLBODY' },
         { id: '2', name: 'ABS' },
         { id: '3', name: 'LEGS' },
         { id: '4', name: 'BACK' },
@@ -25,9 +25,14 @@ export default function WorkoutScreen({ navigation }) {
     const [search, setSearch] = useState("");
 
     const renderTargetArea = ({ item }) => (
-        <View style={styles.targetAreaCard}>
+        <TouchableOpacity
+            style={styles.targetAreaCard}
+            onPress={() => navigation.navigate('ExerciseList', {
+                area: item.name
+            })}
+        >
             <Text style={styles.targetAreaText}>{item.name}</Text>
-        </View>
+        </TouchableOpacity>
     );
     const renderRecommended = ({ item }) => (
         <View style={styles.sliderCard}>
@@ -133,12 +138,18 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         marginRight: 11,
-        top: 20,
+        top: 15,
     },
 
     sliderText: {
-        fontSize: 16,
+        fontSize: 20,
         fontWeight: '500',
+        marginBottom: 10
+    },
+    sliderSubText: {
+        fontSize: 14,
+        fontWeight: '600',
+        color: '#9f8f8b'
     },
 
     targetAreaCard: {
@@ -150,7 +161,7 @@ const styles = StyleSheet.create({
         borderWidth: 2,
         justifyContent: 'center',
         alignItems: 'center',
-        marginBottom: 15,
+        marginBottom: 5,
         top: 9,
     },
 
