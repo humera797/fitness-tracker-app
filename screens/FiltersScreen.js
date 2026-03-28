@@ -15,9 +15,7 @@ export default function FiltersScreen({ navigation }) {
 
         <View style={styles.dropdowncontainer}>
 
-
             <Text style={styles.label}>{label}</Text>
-
 
             <TouchableOpacity
                 style={styles.dropdownHeader}
@@ -63,9 +61,7 @@ export default function FiltersScreen({ navigation }) {
     return (
         <View style={styles.container}>
 
-
             <View style={styles.formWrapper}></View>
-
 
             <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
                 <Text style={styles.backText}>← Back</Text>
@@ -96,18 +92,22 @@ export default function FiltersScreen({ navigation }) {
                 'Duration',
                 duration,
                 setDuration,
-                ['20 minutes', '35 minutes', '45 minutes', '50 minutes'],
+                ['5 minutes', '10 minutes', '15 minutes', '20 minutes'],
                 'duration'
             )}
 
             <TouchableOpacity
                 style={styles.button}
-                onPress={() => navigation.navigate('Workout')}
+                onPress={() => navigation.navigate('ExerciseList', {
+                    filters: {
+                        equipment: equipment,
+                        difficulty: difficulty,
+                        duration: duration
+                    }
+                })}
             >
                 <Text style={styles.buttonText}>Apply filters</Text>
             </TouchableOpacity>
-
-
         </View>
     );
 }

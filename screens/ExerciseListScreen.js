@@ -1,12 +1,10 @@
 import React from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity } from 'react-native';
-import { exercisesData } from '../data/exercises';
+import { exercisesData, filterExercises } from '../data/exercises';
+
 
 export default function ExerciseListScreen({ route, navigation }) {
-  const { area } = route.params;
-
-
-  const data = exercisesData[area] || [];
+  const { area, workoutPlan, filters } = route.params;
 
   const handleExercisePress = (exercise) => {
     console.log('Exercise Data:', exercise);
@@ -16,9 +14,109 @@ export default function ExerciseListScreen({ route, navigation }) {
     });
   };
 
+  console.log('Showing filtered exercises');
+
+  if (filters) {
+    const allExercises = [
+      ...exercisesData.FULLBODY,
+      ...exercisesData.ABS,
+      ...exercisesData.LEGS,
+      ...exercisesData.ARMS,
+      ...exercisesData.BACK,
+      ...exercisesData.CHEST,
+      ...exercisesData.SHOULDERS,
+      ...exercisesData.GLUTES,
+    ];
+
+    const filteredExercises = filterExercises(allExercises, filters);
+
+    return (
+      <View style={styles.container}>
+        <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
+          <Text style={styles.backText}>← Back</Text>
+        </TouchableOpacity>
+
+        <Text style={styles.header}>Filtered Exercises</Text>
+        <Text style={styles.count}>({filteredExercises.length} exercises)</Text>
+
+        <FlatList
+          data={filteredExercises}
+          keyExtractor={(item) => item.id}
+          showsVerticalScrollIndicator={false}
+          renderItem={({ item }) => (
+            <TouchableOpacity
+              style={styles.card}
+              onPress={() => handleExercisePress(item)}
+              activeOpacity={0.7}
+            >
+              <Text style={styles.exerciseName}>{item.name}</Text>
+              <Text style={styles.arrow}>→</Text>
+            </TouchableOpacity>
+          )}
+        />
+      </View>
+    );
+  }
+
+  if (workoutPlan) {
+    const allExercises = [
+      ...exercisesData.FULLBODY,
+      ...exercisesData.ABS,
+      ...exercisesData.LEGS,
+      ...exercisesData.ARMS,
+      ...exercisesData.BACK,
+      ...exercisesData.CHEST,
+      ...exercisesData.SHOULDERS,
+      ...exercisesData.GLUTES,
+    ];
+
+    const workoutExercises = workoutPlan.exercises.map(exercisePlan => {
+      const fullExercise = allExercises.find(exercise => exercise.name === exercisePlan.name);
+      if (fullExercise) {
+        return fullExercise;
+      }
+      return {
+        id: exercisePlan.name,
+        name: exercisePlan.name,
+        duration: exercisePlan.duration,
+        difficulty: workoutPlan.difficulty,
+        calories: workoutPlan.calories,
+        equipment: 'No Equipment',
+        instructions: `Perform ${exercisePlan.reps} of ${exercisePlan.name}.`
+      };
+    });
+
+    return (
+      <View style={styles.container}>
+        <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
+          <Text style={styles.backText}>← Back</Text>
+        </TouchableOpacity>
+
+        <Text style={styles.header}>{workoutPlan.name}</Text>
+
+        <FlatList
+          data={workoutExercises}
+          keyExtractor={(item) => item.id}
+          showsVerticalScrollIndicator={false}
+          renderItem={({ item }) => (
+            <TouchableOpacity
+              style={styles.card}
+              onPress={() => handleExercisePress(item)}
+              activeOpacity={0.7}
+            >
+              <Text style={styles.exerciseName}>{item.name}</Text>
+              <Text style={styles.arrow}>→</Text>
+            </TouchableOpacity>
+          )}
+        />
+      </View>
+    );
+  }
+
+  const data = exercisesData[area] || [];
+
   return (
     <View style={styles.container}>
-
       <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
         <Text style={styles.backText}>← Back</Text>
       </TouchableOpacity>

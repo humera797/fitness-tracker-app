@@ -22,7 +22,7 @@ export default function DetailScreen({ route, navigation }) {
                         <Image
                             source={exercise.image}
                             style={styles.exerciseImage}
-                            resizeMode="cover"
+                            resizeMode="contain"
                         />
                     </View>
                 )}
@@ -54,6 +54,12 @@ export default function DetailScreen({ route, navigation }) {
                     <Text style={styles.descriptionsText}>
                         {exercise.descriptions}
                     </Text>
+                    <View style={styles.tipsContainer}>
+                        <Text style={styles.tipsTitle}>Tip to Remember!</Text>
+                        <Text style={styles.tipsText}>• 3 sets of 12 reps and 60 seconds break.</Text>
+                        <Text style={styles.tipsText}>• Engage your core.</Text>
+                        <Text style={styles.tipsText}>• Dont forget to breath and stay hydrated!</Text>
+                    </View>
                 </View>
 
                 <TouchableOpacity
@@ -66,7 +72,7 @@ export default function DetailScreen({ route, navigation }) {
                     <Text style={styles.completeButtonText}>Workout Complete</Text>
                 </TouchableOpacity>
             </ScrollView>
-        </SafeAreaView>
+        </SafeAreaView >
     );
 }
 
@@ -83,7 +89,7 @@ const styles = StyleSheet.create({
     exerciseImage: {
         width: '100%',
         height: 'undefined',
-        aspectRatio: 16/9,
+        aspectRatio: 16 / 9,
         borderRadius: 10,
         backgroundColor: '#fff',
         alignSelf: 'center'
@@ -167,5 +173,22 @@ const styles = StyleSheet.create({
     backText: {
         fontSize: 16,
         fontWeight: '500',
+    },
+    tipsContainer: {
+        marginTop: 20,
+        paddingTop: 15,
+        borderTopWidth: 1,
+        borderTopColor: '#ddd',
+    },
+    tipsTitle: {
+        fontSize: 16,
+        fontWeight: '600',
+        color: '#ffffff',
+        marginBottom: 10,
+    },
+    tipsText: {
+        fontSize: 15,
+        color: '#554440',
+        marginBottom: 6,
     },
 });

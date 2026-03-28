@@ -6,9 +6,46 @@ import Feather from '@expo/vector-icons/Feather';
 export default function WorkoutScreen({ navigation }) {
 
     const recommended = [
-        { id: '1', title: '35 min full body HIT' },
-        { id: '2', title: '40 min beginner friendly' },
-        { id: '3', title: '50 minutes full body HIT' },
+
+        {
+            id: '1',
+            name: '35 min full body HIT',
+            duration: '35 min',
+            difficulty: 'High',
+            calories: '40',
+            exercises: [
+                { name: 'Burpees' },
+                { name: 'Jumping Jacks' },
+                { name: 'Chest Flys' },
+                { name: 'Plank' },
+            ]
+        },
+        {
+            id: '2',
+            name: '40 min beginner friendly',
+            duration: '40 min',
+            difficulty: 'Medium',
+            calories: '30',
+            exercises: [
+                { name: 'Front Raises' },
+                { name: 'Donkey Kicks' },
+                { name: 'Plank' },
+                { name: 'Alternating Leg Raises' },
+            ]
+        },
+        {
+            id: '3',
+            name: '50 minutes full body HIT',
+            duration: '50 min',
+            difficulty: 'High',
+            calories: '40',
+            exercises: [
+                { name: 'Single Dumbbell Row' },
+                { name: 'Incline Chest Press' },
+                { name: 'Bicycle Crunches' },
+                { name: 'Donkey Kicks' },
+            ]
+        }
     ];
 
     const targetAreas = [
@@ -35,16 +72,24 @@ export default function WorkoutScreen({ navigation }) {
         </TouchableOpacity>
     );
     const renderRecommended = ({ item }) => (
-        <View style={styles.sliderCard}>
-            <Text style={styles.sliderText}>{item.title}</Text>
-        </View>
+        <TouchableOpacity
+            style={styles.sliderCard}
+            onPress={() => navigation.navigate('ExerciseList', {
+                area: item.name,
+                workoutPlan: item
+            })}
+            activeOpacity={0.7}
+        >
+            <Text style={styles.sliderText}>{item.name}</Text>
+            <Text style={styles.sliderSubText}>{item.duration} - {item.calories} calories</Text>
+        </TouchableOpacity>
     );
 
     const filteredtargetAreas = targetAreas.filter(item =>
         item.name.toLowerCase().includes(search.toLowerCase())
     );
     const filteredRecommended = recommended.filter(item =>
-        item.title.toLowerCase().includes(search.toLowerCase())
+        item.name.toLowerCase().includes(search.toLowerCase())
     );
     return (
         <SafeAreaView style={styles.container}>
@@ -169,5 +214,4 @@ const styles = StyleSheet.create({
         fontSize: 17,
         fontWeight: '500',
     }
-
 });
