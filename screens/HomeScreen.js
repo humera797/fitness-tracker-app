@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Calendar } from 'react-native-calendars';
+import { LineChart } from 'react-native-gifted-charts';
 
 export default function HomeScreen() {
 
@@ -16,6 +17,18 @@ export default function HomeScreen() {
     const [minutes, setMinutes] = useState(0);
     const [water, setWater] = useState(0);
     const [workouts, setWorkouts] = useState(0);
+
+
+    const [weightData, setWeightData] = useState([
+        { value: 71, label: 'Mon' },
+        { value: 70, label: 'Tue' },
+        { value: 69, label: 'Wed' },
+        { value: 68, label: 'Thu' },
+        { value: 68, label: 'Fri' },
+        { value: 68, label: 'Sat' },
+        { value: 68, label: 'Sun' },
+    ]);
+
 
     return (
         <SafeAreaView style={styles.container}>
@@ -144,6 +157,36 @@ export default function HomeScreen() {
                         <Text style={styles.startText}>Start Workout</Text>
                     </TouchableOpacity>
                 </View>
+                <View style={styles.chartContainer}>
+                    <Text style={styles.chartTitle}>Weekly Weight</Text>
+                    <View style={styles.chartWrapper}>
+                        <LineChart
+                            data={weightData}
+                            width={295}
+                            height={200}
+                            minValue={68}
+                            maxValue={72}
+                            stepValue={12}
+                            color="#A79692"
+                            thickness={3}
+                            hideDataPoints={false}
+                            dataPointsColor="#A79692"
+                            dataPointsRadius={5}
+                            textColor="#554440"
+                            backgroundColor="#fff"
+                            isAnimated={true}
+                            spacing={40}
+                            yAxisTextStyle={{ fontSize: 11 }}
+                            xAxisLabelTextStyle={{ fontSize: 11 }}
+                            showVerticalLines={true}
+                            verticalLinesColor="#e0e0e0"
+                            yAxisColor="#ddd"
+                            xAxisColor="#ddd"
+                            noOfSections={6}
+                            yAxisLabelWidth={35}
+                        />
+                    </View>
+                </View>
             </ScrollView>
         </SafeAreaView>
     );
@@ -244,5 +287,24 @@ const styles = StyleSheet.create({
     startText: {
         color: '#ffffff',
         fontWeight: '500',
-    }
+    },
+    chartContainer: {
+        backgroundColor: '#fff',
+        bottom: 160,
+        width: '100%',
+        padding: 15,
+        borderRadius: 10,
+        alignItems: 'center',
+    },
+    chartWrapper: {
+        alignItems: 'center',
+        justifyContent: 'center'
+        },
+    chartTitle: {
+        fontSize: 18,
+        fontWeight: 'bold',
+        marginBottom: 15,
+        color: '#554440',
+        alignSelf: 'center',
+    },
 });

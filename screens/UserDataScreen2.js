@@ -57,13 +57,11 @@ export default function UserDataScreen2({ navigation, route }) {
     </View>
   );
 
-  // calculating BMI
   const calculateBMI = (weight, height) => {
     const heightInMeters = height / 100;
     return (weight / (heightInMeters * heightInMeters)).toFixed(1);
   };
 
-  // Rule based workout plan recommendation
   const getWorkoutPlan = (goal, bmi) => {
     if (goal === "Lose Weight" && bmi >= 25) return "Fat Loss Workout";
     if (goal === "Gain Muscle") return "Strength Training Plan";
@@ -71,12 +69,12 @@ export default function UserDataScreen2({ navigation, route }) {
     return "General Fitness Plan";
   };
 
-  //  save user data to Firestore
+  // firestore function to save user data
   const saveUserData = async () => {
     console.log("Button pressed");
-    
+
     const user = auth.currentUser;
-    console.log("USER:", user);
+    console.log("Current User:", user);
 
     if (!user) {
       console.error("No user logged in.");
