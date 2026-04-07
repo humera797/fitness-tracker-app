@@ -82,7 +82,7 @@ export default function ExerciseListScreen({ route, navigation }) {
         difficulty: workoutPlan.difficulty,
         calories: workoutPlan.calories,
         equipment: 'No Equipment',
-        instructions: `Perform ${exercisePlan.reps} of ${exercisePlan.name}.`
+        description: `Perform ${exercisePlan.reps} of ${exercisePlan.name}.`
       };
     });
 

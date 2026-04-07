@@ -14,6 +14,9 @@ import FiltersScreen from './screens/FiltersScreen';
 import UserProfileScreen from './screens/UserProfileScreen';
 import ExerciseListScreen from './screens/ExerciseListScreen';
 import DetailScreen from './screens/DetailScreen';
+import ActivityScreen from './screens/ActivityScreen';
+import FavouritesScreen from './screens/FavouritesScreen';
+import HistoryScreen from './screens/HistoryScreen';
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -30,7 +33,10 @@ export default function App() {
         <Stack.Screen name="Home" component={HomeTabs} />
         <Stack.Screen name="Filter" component={FiltersScreen} />
         <Stack.Screen name="ExerciseList" component={ExerciseListScreen} />
-        <Stack.Screen name="DetailScreen" component={DetailScreen}/>
+        <Stack.Screen name="DetailScreen" component={DetailScreen} />
+        <Stack.Screen name="Activity" component={ActivityScreen} />
+        <Stack.Screen name="Favourites" component={FavouritesScreen} />
+        <Stack.Screen name="History" component={HistoryScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );

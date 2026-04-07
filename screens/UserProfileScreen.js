@@ -1,23 +1,65 @@
-import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, Alert } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import Feather from '@expo/vector-icons/Feather';
 import Fontisto from '@expo/vector-icons/Fontisto';
-import MaterialIcons from '@expo/vector-icons/MaterialIcons';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import Entypo from '@expo/vector-icons/Entypo';
+import FontAwesome from '@expo/vector-icons/FontAwesome';
+import { auth, db } from '../firebase';
+import { doc, getDoc } from 'firebase/firestore';
 
-export default function UserProfileScreen({ navigation }) {
+export default function ProfileScreen({ navigation }) {
+    const [userData, setUserData] = useState(null);
+    const [userEmail, setUserEmail] = useState('');
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        loadUserData();
+    }, []);
+
+    const loadUserData = async () => {
+        try {
+            const user = auth.currentUser;
+            if (user) {
+                setUserEmail(user.email);
+                const docRef = doc(db, 'users', user.uid);
+                const docSnap = await getDoc(docRef);
+                if (docSnap.exists()) {
+                    setUserData(docSnap.data());
+                }
+            }
+        } catch (error) {
+            console.log('Error:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleLogout = async () => {
+        Alert.alert('Logout', 'Are you sure you want to logout?', [
+            { text: 'Cancel', style: 'cancel' },
+            {
+                text: 'Logout', style: 'destructive', onPress: async () => {
+                    await auth.signOut();
+                    navigation.replace('Welcome');
+                }
+            }
+        ]);
+    };
     return (
         <SafeAreaView style={styles.container}>
             <Text style={styles.header}>Your Profile</Text>
 
             <View style={styles.userCard}>
-                <View style={styles.picture} />
+                <View style={styles.image}>
+                    <FontAwesome name="user-circle" size={60} color="#a48b85" />
+                </View>
                 <View>
-
-                    <Text style={styles.name}>Humera Saeed</Text>
-                    <Text style={styles.email}>humerasaeed419@gmail.com</Text>
+                    <Text style={styles.name}>{userData?.name || 'User'}</Text>
+                    <Text style={styles.email}>{userEmail}</Text>
                 </View>
             </View>
+
             <View style={styles.buttonRow}>
                 <TouchableOpacity style={styles.profileButton} onPress={() => navigation.navigate('Activity')}>
                     <Feather name="activity" size={28} color="black" />
@@ -30,7 +72,7 @@ export default function UserProfileScreen({ navigation }) {
                 </TouchableOpacity>
 
                 <TouchableOpacity style={styles.profileButton} onPress={() => navigation.navigate('Favourites')}>
-                    <MaterialIcons name="favorite-outline" size={24} color="black" />
+                    <Entypo name="heart-outlined" size={30} color="black" />
                     <Text style={styles.buttonText}>Favourites</Text>
                 </TouchableOpacity>
             </View>
@@ -38,29 +80,40 @@ export default function UserProfileScreen({ navigation }) {
             <View style={styles.userprofileCard}>
                 <Text style={styles.sectionTitle}>User Profile</Text>
 
-                <Text style={styles.label}>Age</Text>
-                <Text style={styles.info}>22 Years</Text>
+                <View style={styles.infoRow}>
+                    <Text style={styles.label}>Age</Text>
+                    <Text style={styles.info}>{userData?.age || '—'} Years</Text>
+                </View>
 
-                <Text style={styles.label}>Weight</Text>
-                <Text style={styles.info}>59kg</Text>
+                <View style={styles.infoRow}>
+                    <Text style={styles.label}>Weight</Text>
+                    <Text style={styles.info}>{userData?.weight || '—'} kg</Text>
+                </View>
 
-                <Text style={styles.label}>Height</Text>
-                <Text style={styles.info}>172cm</Text>
+                <View style={styles.infoRow}>
+                    <Text style={styles.label}>Height</Text>
+                    <Text style={styles.info}>{userData?.height || '—'}</Text>
+                </View>
 
-                <Text style={styles.label}>BMI</Text>
-                <Text style={styles.info}>19.9</Text>
+                <View style={styles.infoRow}>
+                    <Text style={styles.label}>BMI</Text>
+                    <Text style={styles.info}>{userData?.bmi || '—'}</Text>
+                </View>
 
-                <Text style={styles.label}>Target goal</Text>
-                <Text style={styles.info}>Lose weight</Text>
+                <View style={styles.infoRow}>
+                    <Text style={styles.label}>Target goal</Text>
+                    <Text style={styles.info}>{userData?.targetgoal || '—'}</Text>
+                </View>
 
-                <Text style={styles.label}>Activity level</Text>
-                <Text style={styles.info}>Medium</Text>
+                <View style={styles.infoRow}>
+                    <Text style={styles.label}>Activity level</Text>
+                    <Text style={styles.info}>{userData?.activitylevel || '—'}</Text>
+                </View>
             </View>
 
-            <TouchableOpacity style={styles.logoutButton}>
+            <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
                 <Text style={styles.logoutText}>Logout</Text>
             </TouchableOpacity>
-
         </SafeAreaView>
     );
 }
@@ -85,16 +138,18 @@ const styles = StyleSheet.create({
         fontSize: 24,
         fontWeight: '600',
         color: 'black',
-        marginBottom: 15,
-        bottom: 20,
+        marginBottom: 2,
+        bottom: 15,
         textAlign: 'center'
     },
-    picture: {
+    image: {
         width: 60,
         height: 60,
         borderRadius: 30,
         backgroundColor: '#BDBDBD',
         marginRight: 15,
+        alignItems: 'center',
+        justifyContent: 'center',
     },
 
     name: {
@@ -121,7 +176,6 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
     },
-
     buttonText: {
         fontSize: 12,
         fontWeight: '500',
@@ -143,7 +197,7 @@ const styles = StyleSheet.create({
     },
 
     label: {
-        fontSize: 18,
+        fontSize: 19,
         fontWeight: '600',
         marginTop: 5,
     },
@@ -153,13 +207,14 @@ const styles = StyleSheet.create({
         fontWeight: '500',
         color: '#987878',
         marginBottom: 5,
+        top: 5,
     },
 
     logoutButton: {
         backgroundColor: '#A79692',
-        padding: 13,
+        padding: 12,
         borderRadius: 10,
-        marginTop: 20,
+        marginTop: 15,
         borderWidth: 1,
         borderColor: '#322f2f',
         borderRadius: 10,

@@ -56,9 +56,17 @@ export default function UserDataScreen2({ navigation, route }) {
       )}
     </View>
   );
+  const convertHeightToCm = (heightString) => {
 
+    const feet = parseInt(heightString.split("'")[0]);
+    const inches = parseInt(heightString.split("'")[1].replace('"', ''));
+    const totalCm = (feet * 30.48) + (inches * 2.54);
+    return totalCm;
+  };
   const calculateBMI = (weight, height) => {
-    const heightInMeters = height / 100;
+    const heightInCm = convertHeightToCm(height);
+    const heightInMeters = heightInCm / 100;
+    if (heightInMeters === 0) return 0;
     return (weight / (heightInMeters * heightInMeters)).toFixed(1);
   };
 
@@ -81,7 +89,7 @@ export default function UserDataScreen2({ navigation, route }) {
       return;
     }
 
-    const bmi = calculateBMI(Number(weight), Number(height));
+    const bmi = calculateBMI(Number(weight), height);
     const recommendedPlan = getWorkoutPlan(targetgoal, bmi);
 
     await setDoc(doc(db, "users", user.uid), {
@@ -119,7 +127,7 @@ export default function UserDataScreen2({ navigation, route }) {
         'Target Goal',
         targetgoal,
         setTargetGoal,
-        ['Lose Weight', 'Maintain Weight', 'Gain Weight'],
+        ['Lose Weight', 'Maintain Weight', 'Gain Muscle'],
         'targetGoal'
       )}
 

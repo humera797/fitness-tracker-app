@@ -1,14 +1,44 @@
 // Login Screen - Allows users to log in to their account
 
-import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, TextInput } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, StyleSheet, TextInput, TouchableOpacity, Alert, Image } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { auth } from '../firebase';
+import { signInWithEmailAndPassword } from 'firebase/auth';
 
 export default function LoginScreen({ navigation }) {
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [loading, setLoading] = useState(false);
+
+    const handleLogin = async () => {
+        if (!email || !password) {
+            Alert.alert('Error', 'Please fill in all fields');
+            return;
+        }
+
+        setLoading(true);
+        try {
+            await signInWithEmailAndPassword(auth, email, password);
+            navigation.replace('Home');
+        } catch (error) {
+            let errorMessage = 'Login failed';
+            if (error.code === 'auth/user-not-found') {
+                errorMessage = 'User not found';
+            } else if (error.code === 'auth/wrong-password') {
+                errorMessage = 'Wrong password';
+            } else if (error.code === 'auth/invalid-email') {
+                errorMessage = 'Invalid email address';
+            }
+            Alert.alert('Login Failed', errorMessage);
+        } finally {
+            setLoading(false);
+        }
+    };
+
     return (
-        <View style={styles.container}>
-            <TouchableOpacity
-                onPress={() => navigation.goBack()}
-                style={styles.backButton}>
+        <SafeAreaView style={styles.container}>
+            <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
                 <Text style={styles.backText}>← Back</Text>
             </TouchableOpacity>
 
@@ -17,21 +47,26 @@ export default function LoginScreen({ navigation }) {
             <Text style={styles.label}>Email</Text>
             <TextInput
                 style={styles.input}
-                placeholder="enter email"
+                placeholder="Enter your email"
+                value={email}
+                onChangeText={setEmail}
+                keyboardType="email-address"
+                autoCapitalize="none"
             />
 
             <Text style={styles.label}>Password</Text>
             <TextInput
                 style={styles.input}
-                placeholder="enter password"
+                placeholder="Enter your password"
+                value={password}
+                onChangeText={setPassword}
                 secureTextEntry
             />
 
-            <TouchableOpacity
-                style={styles.button}
-                onPress={() => navigation.replace("Home")}
-            >
-                <Text style={styles.buttonText}>Login</Text>
+            <TouchableOpacity style={styles.button} onPress={handleLogin} disabled={loading}>
+                <Text style={styles.buttonText}>
+                    {loading ? 'Logging in...' : 'Login'}
+                </Text>
             </TouchableOpacity>
 
             <View style={styles.bottomtextcontainer} />
@@ -39,8 +74,8 @@ export default function LoginScreen({ navigation }) {
             <Text style={styles.Text}>Dont have an account?</Text>
             <TouchableOpacity onPress={() => navigation.navigate('Signup')}>
                 <Text style={styles.signupText}>SignUp</Text>
-            </TouchableOpacity>
-        </View>
+            </TouchableOpacity >
+        </SafeAreaView >
     );
 }
 
