@@ -4,6 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { LineChart } from 'react-native-gifted-charts';
 import { auth, db } from '../firebase';
 import { doc, getDoc, collection, getDocs, query, orderBy, limit } from 'firebase/firestore';
+import { getEarnedBadges } from '../utils/gamification';
 
 export default function ActivityScreen({ navigation }) {
     const [activeMinutesData, setActiveMinutesData] = useState([]);
@@ -15,12 +16,20 @@ export default function ActivityScreen({ navigation }) {
     const [weightLoss, setWeightLoss] = useState(0);
     const [startingWeight, setStartingWeight] = useState(0);
     const [currentWeight, setCurrentWeight] = useState(0);
+    const [earnedBadges, setEarnedBadges] = useState([]);
 
     useEffect(() => {
         loadActivityData();
         loadTotalStats();
         loadWeightLossData();
+        loadEarnedBadges();
     }, []);
+
+    const loadEarnedBadges = async () => {
+        const badges = await getEarnedBadges();
+        console.log('Badges to display:', badges);
+        setEarnedBadges(badges);
+    };
 
     const loadActivityData = async () => {
         const userId = auth.currentUser?.uid;
@@ -65,7 +74,6 @@ export default function ActivityScreen({ navigation }) {
         const userId = auth.currentUser?.uid;
         if (!userId) return;
         try {
-
             const userDoc = await getDoc(doc(db, 'users', userId));
             let latestWeight = 0;
             let firstWeight = null;
@@ -170,7 +178,6 @@ export default function ActivityScreen({ navigation }) {
                             <Text style={styles.statNumber}>{totalCalories}</Text>
                             <Text style={styles.statLabel}>Total calories burned</Text>
                         </View>
-                        {/* WEIGHT LOSS STAT ITEM */}
                         <View style={styles.statBox}>
                             <Text style={[styles.statNumber, weightLoss > 0 && styles.weightLossText]}>
                                 {weightLoss > 0 ? `-${weightLoss}` : weightLoss}
@@ -180,6 +187,25 @@ export default function ActivityScreen({ navigation }) {
                                 <Text style={styles.weightDetail}>
                                     {startingWeight}kg → {currentWeight}kg
                                 </Text>
+                            )}
+                        </View>
+                    </View>
+
+                    <View style={styles.achievementSection}>
+                        <Text style={styles.achievementTitle}>🏆 Achievement Badges</Text>
+                        <View style={styles.badgeContainer}>
+                            {earnedBadges.length === 0 ? (
+                                <Text style={styles.noBadgesText}>You have no achievements yet!</Text>
+                            ) : (
+                                earnedBadges.map((badge, index) => (
+                                    <View key={index} style={styles.badgeItem}>
+                                        <Text style={styles.badgeIcon}>{badge.icon || '🏆'}</Text>
+                                        <View style={styles.badgeInfo}>
+                                            <Text style={styles.badgeName}>{badge.name}</Text>
+                                            <Text style={styles.badgeDescription}>{badge.description}</Text>
+                                        </View>
+                                    </View>
+                                ))
                             )}
                         </View>
                     </View>
@@ -300,6 +326,58 @@ const styles = StyleSheet.create({
         marginTop: 4,
         textAlign: 'center',
     },
+    achievementSection: {
+        marginTop: 24,
+        paddingTop: 24,
+        borderTopWidth: 2,
+        borderTopColor: '#dadbdb',
+    },
+    achievementTitle: {
+        fontSize: 20,
+        fontWeight: '600',
+        color: '#554440',
+        marginBottom: 20,
+    },
+    badgeContainer: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+    },
+    badgeItem: {
+        backgroundColor: '#f0ddd8',
+        borderColor: '#A79692',
+        borderWidth: 1,
+        padding: 11,
+        borderRadius: 15,
+        marginBottom: 13,
+        flexDirection: 'row',
+        alignItems: 'center',
+        width: '100%',
+    },
+    badgeInfo: {
+        marginLeft: 12,
+        flex: 1,
+    },
+    badgeName: {
+        fontSize: 15,
+        fontWeight: '600',
+        color: '#554440',
+    },
+    badgeIcon: {
+        fontSize: 18,
+        alignSelf: 'center',
+    },
+    badgeDescription: {
+        fontSize: 12,
+        fontWeight: '700',
+        marginTop: 2,
+        color: '#A79692',
+    },
+    noBadgesText: {
+        fontSize: 15,
+        color: '#554440',
+        padding: 15,
+        left: 33
+    },
     chartCard: {
         backgroundColor: '#fff',
         margin: 20,
@@ -318,7 +396,6 @@ const styles = StyleSheet.create({
         position: 'absolute',
         top: 20,
         left: 20,
-        zIndex: 1,
     },
     backText: {
         fontSize: 16,

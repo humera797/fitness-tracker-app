@@ -6,13 +6,21 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Calendar } from 'react-native-calendars';
 import { LineChart } from 'react-native-gifted-charts';
 import Slider from '@react-native-community/slider';
+import Feather from '@expo/vector-icons/Feather';
+import Octicons from '@expo/vector-icons/Octicons';
+import ReminderPopover from '../components/ReminderPopover';
+import { getTodayReminder, hasSeenTodayReminder, markReminderSeen } from '../utils/reminders';
+import { getWorkoutForDate, getCompletedWorkoutDates } from '../utils/workoutPlan';
+import { checkAndAwardBadges, calculateStreak, getTotalWorkouts, getTotalCalories, getTotalWater, getTotalMinutes } from '../utils/gamification';
 import { useFocusEffect } from '@react-navigation/native';
 import { auth, db } from '../firebase';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 
-export default function HomeScreen() {
+export default function HomeScreen({ navigation }) {
+
+    const today = new Date().toISOString().split('T')[0];
     const [username, setUsername] = useState('');
-    const [selectedDate, setSelectedDate] = useState('');
+    const [selectedDate, setSelectedDate] = useState(today);
     const [calories, setCalories] = useState(0);
     const [minutes, setMinutes] = useState(0);
     const [water, setWater] = useState(0);
@@ -20,6 +28,15 @@ export default function HomeScreen() {
     const [weight, setWeight] = useState(69);
     const [weightData, setWeightData] = useState([]);
     const [weightRange, setWeightRange] = useState({ min: 60, max: 80 });
+    const [todayWorkout, setTodayWorkout] = useState(null);
+    const [selectedDateWorkout, setSelectedDateWorkout] = useState(null);
+    const [completedDates, setCompletedDates] = useState({});
+
+    const [todaysReminder, setTodaysReminder] = useState(null);
+    const [showReminder, setShowReminder] = useState(false);
+    const [hasNewReminder, setHasNewReminder] = useState(false);
+    const [showBellPopover, setShowBellPopover] = useState(false);
+    const [todaysReminderForBell, setTodaysReminderForBell] = useState(null);
 
     const userId = auth.currentUser?.uid;
 
@@ -28,6 +45,11 @@ export default function HomeScreen() {
         loadTodayProgress();
         loadWorkoutsCount();
         loadWeeklyWeightData();
+        loadTodayWorkout();
+        loadCompletedDates();
+        loadWorkoutForSelectedDate(today);
+        checkAndShowReminder();
+        setSelectedDate(today);
     }, []);
 
     useFocusEffect(
@@ -59,11 +81,11 @@ export default function HomeScreen() {
             const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
             const weightHistory = [];
 
-            const today = new Date();
-            const dayOfWeek = today.getDay();
+            const todayDate = new Date();
+            const dayOfWeek = todayDate.getDay();
             const daysToMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
-            const monday = new Date(today);
-            monday.setDate(today.getDate() - daysToMonday);
+            const monday = new Date(todayDate);
+            monday.setDate(todayDate.getDate() - daysToMonday);
 
             for (let i = 0; i < 7; i++) {
                 const date = new Date(monday);
@@ -108,8 +130,8 @@ export default function HomeScreen() {
 
     const loadTodayProgress = async () => {
         if (!userId) return;
-        const today = new Date().toISOString().split('T')[0];
-        const docRef = doc(db, 'users', userId, 'dailyProgress', today);
+        const todayStr = new Date().toISOString().split('T')[0];
+        const docRef = doc(db, 'users', userId, 'dailyProgress', todayStr);
         const docSnap = await getDoc(docRef);
         if (docSnap.exists()) {
             const data = docSnap.data();
@@ -121,8 +143,8 @@ export default function HomeScreen() {
 
     const loadWorkoutsCount = async () => {
         if (!userId) return;
-        const today = new Date().toISOString().split('T')[0];
-        const docRef = doc(db, 'users', userId, 'completedWorkouts', today);
+        const todayStr = new Date().toISOString().split('T')[0];
+        const docRef = doc(db, 'users', userId, 'completedWorkouts', todayStr);
         const docSnap = await getDoc(docRef);
         if (docSnap.exists()) {
             setWorkouts(docSnap.data().count || 0);
@@ -133,23 +155,23 @@ export default function HomeScreen() {
 
     const saveDailyProgress = async (newCalories, newMinutes, newWater) => {
         if (!userId) return;
-        const today = new Date().toISOString().split('T')[0];
-        const docRef = doc(db, 'users', userId, 'dailyProgress', today);
+        const todayStr = new Date().toISOString().split('T')[0];
+        const docRef = doc(db, 'users', userId, 'dailyProgress', todayStr);
         await setDoc(docRef, {
             calories: newCalories,
             minutes: newMinutes,
             water: newWater,
-            date: today
+            date: todayStr
         }, { merge: true });
     };
 
     const saveWeight = async () => {
         if (!userId) return;
-        const today = new Date().toISOString().split('T')[0];
-        const weightRef = doc(db, 'users', userId, 'weightHistory', today);
+        const todayStr = new Date().toISOString().split('T')[0];
+        const weightRef = doc(db, 'users', userId, 'weightHistory', todayStr);
         await setDoc(weightRef, {
             weight: weight,
-            date: today
+            date: todayStr
         });
 
         await setDoc(doc(db, 'users', userId), {
@@ -160,10 +182,33 @@ export default function HomeScreen() {
         loadWeeklyWeightData();
     };
 
+    const checkForBadges = async () => {
+        const streak = await calculateStreak();
+        const totalWorkouts = await getTotalWorkouts();
+        const totalCalories = await getTotalCalories();
+        const totalWater = await getTotalWater();
+        const totalMinutes = await getTotalMinutes();
+
+        const userStats = {
+            totalWorkouts: totalWorkouts,
+            currentStreak: streak,
+            totalCalories: totalCalories,
+            totalWater: totalWater,
+            totalMinutes: totalMinutes
+        };
+
+        const newBadges = await checkAndAwardBadges(userStats);
+        if (newBadges.length > 0) {
+            const badgeNames = newBadges.map(b => `${b.icon} ${b.name}`).join('\n');
+            Alert.alert('NEW ACHIEVEMENT UNLOCKED! 🎉', badgeNames);
+        }
+    };
+
     const addCalories = async () => {
         const newValue = calories + 10;
         setCalories(newValue);
         await saveDailyProgress(newValue, minutes, water);
+        await checkForBadges();
     };
 
     const removeCalories = async () => {
@@ -176,6 +221,7 @@ export default function HomeScreen() {
         const newValue = minutes + 5;
         setMinutes(newValue);
         await saveDailyProgress(calories, newValue, water);
+        await checkForBadges();
     };
 
     const removeMinutes = async () => {
@@ -188,6 +234,7 @@ export default function HomeScreen() {
         const newValue = water + 1;
         setWater(newValue);
         await saveDailyProgress(calories, minutes, newValue);
+        await checkForBadges();
     };
 
     const removeWater = async () => {
@@ -211,25 +258,124 @@ export default function HomeScreen() {
             setWater(0);
         }
     };
-
     const onDaySelect = async (day) => {
-        setSelectedDate(day.dateString);
-        await loadDataForDate(day.dateString);
+        const newDate = day.dateString;
+        setSelectedDate(newDate);
+        await loadDataForDate(newDate);
+        await loadWorkoutForSelectedDate(newDate);
+    };
+
+    const loadWorkoutForSelectedDate = async (date) => {
+        const workout = await getWorkoutForDate(date);
+        setSelectedDateWorkout(workout);
+    };
+
+    const loadTodayWorkout = async () => {
+        const todayStr = new Date().toISOString().split('T')[0];
+        const workout = await getWorkoutForDate(todayStr);
+        setTodayWorkout(workout);
+    };
+
+    const handleWorkoutAction = async () => {
+        let date, workout;
+
+        if (selectedDate && selectedDate !== new Date().toISOString().split('T')[0]) {
+            date = selectedDate;
+            workout = selectedDateWorkout;
+        } else {
+            date = new Date().toISOString().split('T')[0];
+            workout = todayWorkout;
+        }
+
+        if (!workout) {
+            Alert.alert('Error', 'No workout found for this date');
+            return;
+        }
+
+        if (workout.isCompleted) {
+            Alert.alert('Already Completed', 'You already completed this workout!');
+        } else {
+            navigation.navigate('WorkoutPlan', {
+                date: date,
+                exercises: workout.exercises,
+                planName: workout.planName,
+                isCompleted: false
+            });
+        }
+    };
+
+    const loadCompletedDates = async () => {
+    const dates = await getCompletedWorkoutDates();
+    const marked = {};
+    dates.forEach(date => {
+        marked[date] = { 
+            selected: true,           
+            selectedColor: '#554440', 
+            selectedTextColor: '#ffffff'
+        };
+    });
+    setCompletedDates(marked);
+};
+
+    const formatDate = (dateString) => {
+        const [year, month, day] = dateString.split('-');
+        return `${day}/${month}/${year}`;
+    };
+
+    const checkAndShowReminder = async () => {
+        const seen = await hasSeenTodayReminder();
+        if (!seen) {
+            const reminder = await getTodayReminder();
+            if (reminder) {
+                setTodaysReminder(reminder);
+                setShowReminder(true);
+                setHasNewReminder(true);
+                await markReminderSeen();
+            }
+        }
+    };
+    const openBellPopover = async () => {
+        const reminder = await getTodayReminder();
+        setTodaysReminderForBell(reminder);
+        setShowBellPopover(true);
+    };
+
+    const closeBellPopover = () => {
+        setShowBellPopover(false);
+    };
+
+    const closeReminder = async () => {
+        setShowReminder(false);
+        await markReminderSeen();
     };
 
     return (
         <SafeAreaView style={styles.container}>
             <ScrollView>
-                <Text style={styles.greeting}>Hey {username},</Text>
+                <View style={styles.headerRow}>
+                    <Text style={styles.greeting}>Hey {username},</Text>
+                    <TouchableOpacity onPress={openBellPopover} style={styles.bellIcon}>
+                        <Feather name="bell" size={30} color="#554440" />
+                        {hasNewReminder && (
+                            <View style={styles.dot}>
+                                <Octicons name="dot-fill" size={20} color="#ffffff" />
+                            </View>
+                        )}
+                    </TouchableOpacity>
+                </View>
                 <Text style={styles.subgreeting}>Let's workout</Text>
 
                 <View style={styles.calendarCard}>
                     <Calendar
                         onDayPress={onDaySelect}
                         markedDates={{
-                            [selectedDate]: { selected: true, selectedColor: '#A79692' }
+                            ...completedDates,
+                            [selectedDate]: { selected: true, selectedColor: '#A79692', selectedTextColor: '#ffffff' }
                         }}
-                        theme={styles.calendarTheme}
+                        theme={{
+                            ...styles.calendarTheme,
+                            todayTextColor: '#A79692',
+                        }}
                     />
                 </View>
 
@@ -267,7 +413,6 @@ export default function HomeScreen() {
                         <TouchableOpacity onPress={removeWater} style={styles.circle}>
                             <Text>-</Text>
                         </TouchableOpacity>
-
                         <Text>{water}</Text>
                         <TouchableOpacity onPress={addWater} style={styles.circle}>
                             <Text>+</Text>
@@ -279,18 +424,28 @@ export default function HomeScreen() {
                     <Text>workouts logged</Text>
                     <Text style={styles.workoutCount}>{workouts}</Text>
                 </View>
-
-                <Text style={styles.sectionTitle}>Today's Plan</Text>
-
+                <Text style={styles.sectionTitle}>
+                    {selectedDate === today ? "Today's Plan" : `Your plan for ${formatDate(selectedDate)}`}
+                </Text>
                 <View style={styles.planCard}>
-                    <Text style={styles.planTitle}>Plan</Text>
-                    <Text style={styles.planDetails}>Duration: 30 minutes</Text>
-                    <Text style={styles.planDetails}>Exercises: 6</Text>
-                    <TouchableOpacity style={styles.startButton}>
-                        <Text style={styles.startText}>Start Workout</Text>
-                    </TouchableOpacity>
-                </View>
+                    <Text style={styles.planTitle}>
+                        {selectedDateWorkout?.planName || todayWorkout?.planName || 'Plan'}
+                    </Text>
+                    <Text style={styles.planDetails}>Duration: 40-50 minutes</Text>
+                    <Text style={styles.planDetails}>
+                        Exercises: {selectedDateWorkout?.exercises?.length || todayWorkout?.exercises?.length || 6}
+                    </Text>
 
+                    {(selectedDateWorkout?.isCompleted || (selectedDate === today && todayWorkout?.isCompleted)) ? (
+                        <View style={[styles.startButton, styles.completedButton]}>
+                            <Text style={styles.startText}>Workout Completed ✓</Text>
+                        </View>
+                    ) : (
+                        <TouchableOpacity style={styles.startButton} onPress={handleWorkoutAction}>
+                            <Text style={styles.startText}>Start Workout</Text>
+                        </TouchableOpacity>
+                    )}
+                </View>
                 <View style={styles.chartContainer}>
                     <Text style={styles.chartTitle}>Weekly Weight (kg)</Text>
                     <View style={styles.chartWrapper}>
@@ -319,7 +474,6 @@ export default function HomeScreen() {
                                 xAxisColor="#ddd"
                                 noOfSections={6}
                                 yAxisLabelWidth={35}
-
                             />
                         )}
                     </View>
@@ -340,11 +494,11 @@ export default function HomeScreen() {
                         inverted={true}
                         onSlidingComplete={async (value) => {
                             if (userId) {
-                                const today = new Date().toISOString().split('T')[0];
-                                const weightRef = doc(db, 'users', userId, 'weightHistory', today);
+                                const todayStr = new Date().toISOString().split('T')[0];
+                                const weightRef = doc(db, 'users', userId, 'weightHistory', todayStr);
                                 await setDoc(weightRef, {
                                     weight: value,
-                                    date: today,
+                                    date: todayStr,
                                     timestamp: new Date().toISOString()
                                 }, { merge: true });
 
@@ -369,6 +523,18 @@ export default function HomeScreen() {
                     </View>
                 </View>
             </ScrollView>
+            <ReminderPopover
+                visible={showReminder}
+                onClose={closeReminder}
+                reminders={todaysReminder ? [todaysReminder] : []}
+                title="Today's Goal"
+            />
+            <ReminderPopover
+                visible={showBellPopover}
+                onClose={closeBellPopover}
+                reminders={todaysReminderForBell ? [todaysReminderForBell] : []}
+                title="Today's Reminder"
+            />
         </SafeAreaView>
     );
 }
@@ -380,25 +546,41 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
     },
     greeting: {
-        fontSize: 25,
+        fontSize: 28,
         fontWeight: '500',
-        position: 'absolute',
-        left: 8,
+        left: 15,
     },
     subgreeting: {
-        fontSize: 18,
+        fontSize: 20,
         fontWeight: '400',
         position: 'absolute',
         top: 30,
-        left: 10,
+        left: 15,
+        marginTop: 5,
+    },
+    headerRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: 10,
+    },
+    bellIcon: {
+        position: 'relative',
+        right: 15,
+        top: 10,
+    },
+    dot: {
+        position: 'absolute',
+        top: 1,
+        right: 12,
     },
     calendarCard: {
         backgroundColor: '#ffffff',
         color: '#C3B2AE',
         borderRadius: 12,
         padding: 10,
-        marginBottom: 250,
-        top: 70,
+        marginBottom: 225,
+        top: 40,
     },
     calendarTheme: {
         selectedDayBackgroundColor: "#A79692",
@@ -410,7 +592,8 @@ const styles = StyleSheet.create({
 
     sectionTitle: {
         fontSize: 20,
-        fontWeight: '500',
+        color: '#ffffff',
+        fontWeight: '700',
         marginBottom: 15,
         bottom: 170,
         left: 5
@@ -468,6 +651,9 @@ const styles = StyleSheet.create({
     startText: {
         color: '#ffffff',
         fontWeight: '500',
+    },
+    completedButton: {
+        backgroundColor: '#A79692',
     },
     chartContainer: {
         backgroundColor: '#fff',

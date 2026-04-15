@@ -4,11 +4,11 @@ import { createStackNavigator } from '@react-navigation/stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 
 import WelcomeScreen from './screens/WelcomeScreen';
-import LoginScreen from './screens/LoginScreen';
 import SignupScreen from './screens/SignupScreen';
 import UserDataScreen1 from './screens/UserDataScreen1';
 import UserDataScreen2 from './screens/UserDataScreen2';
 import HomeScreen from './screens/HomeScreen';
+import LoginScreen from './screens/LoginScreen';
 import WorkoutScreen from './screens/WorkoutScreen';
 import FiltersScreen from './screens/FiltersScreen';
 import UserProfileScreen from './screens/UserProfileScreen';
@@ -17,6 +17,7 @@ import DetailScreen from './screens/DetailScreen';
 import ActivityScreen from './screens/ActivityScreen';
 import FavouritesScreen from './screens/FavouritesScreen';
 import HistoryScreen from './screens/HistoryScreen';
+import WorkoutPlanScreen from './screens/WorkoutPlanScreen';
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -37,6 +38,7 @@ export default function App() {
         <Stack.Screen name="Activity" component={ActivityScreen} />
         <Stack.Screen name="Favourites" component={FavouritesScreen} />
         <Stack.Screen name="History" component={HistoryScreen} />
+        <Stack.Screen name="WorkoutPlan" component={WorkoutPlanScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );

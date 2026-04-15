@@ -73,7 +73,7 @@ export default function UserDataScreen2({ navigation, route }) {
   const getWorkoutPlan = (goal, bmi) => {
     if (goal === "Lose Weight" && bmi >= 25) return "Fat Loss Workout";
     if (goal === "Gain Muscle") return "Strength Training Plan";
-    if (goal === "Maintain Fitness") return "Balanced Fitness Plan";
+    if (goal === "Maintain Weight") return "Balanced Fitness Plan";
     return "General Fitness Plan";
   };
 

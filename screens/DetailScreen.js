@@ -4,6 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { auth, db } from '../firebase';
 import { doc, updateDoc, arrayUnion, arrayRemove, getDoc, setDoc } from 'firebase/firestore';
 import Entypo from '@expo/vector-icons/Entypo';
+import { checkAndAwardBadges, calculateStreak, getTotalWorkouts, getTotalCalories, getTotalMinutes, getTotalWater } from '../utils/gamification';
 
 export default function DetailScreen({ route, navigation }) {
     const { exercise, area } = route.params;
@@ -81,8 +82,28 @@ export default function DetailScreen({ route, navigation }) {
                     date: today
                 });
             }
+            const totalWorkouts = await getTotalWorkouts();
+            const streak = await calculateStreak();
+            const totalCalories = await getTotalCalories();
+            const totalWater = await getTotalWater();
+            const totalMinutes = await getTotalMinutes();
 
-            Alert.alert('Great Job!', `${exercise.name} completed! 💪`);
+            const userStats = {
+                totalWorkouts: totalWorkouts + 1,
+                currentStreak: streak,
+                todayCalories: totalCalories,
+                todayWater: totalWater,
+                todayMinutes: totalMinutes
+            };
+
+            const newBadges = await checkAndAwardBadges(userStats);
+
+            if (newBadges.length > 0) {
+                const badgeNames = newBadges.map(b => `${b.icon} ${b.name}`).join('\n');
+                Alert.alert('NEW ACHIEVEMENT UNLOCKED! 🎉', badgeNames);
+            }
+
+            Alert.alert('Good job!', `You completed ${exercise.name} ! 💪`);
             navigation.goBack();
         } catch (error) {
             console.log('Error saving workout:', error);
