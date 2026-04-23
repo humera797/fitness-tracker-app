@@ -4,7 +4,7 @@ import { auth, db } from '../firebase';
 import { doc, setDoc } from 'firebase/firestore';
 
 export default function UserDataScreen2({ navigation, route }) {
-  const { age, height, weight } = route.params;
+  const { name, age, height, weight } = route.params;
 
   const [activitylevel, setActivityLevel] = useState('');
   const [targetgoal, setTargetGoal] = useState('');
@@ -77,7 +77,6 @@ export default function UserDataScreen2({ navigation, route }) {
     return "General Fitness Plan";
   };
 
-  // firestore function to save user data
   const saveUserData = async () => {
     console.log("Button pressed");
 
@@ -93,6 +92,7 @@ export default function UserDataScreen2({ navigation, route }) {
     const recommendedPlan = getWorkoutPlan(targetgoal, bmi);
 
     await setDoc(doc(db, "users", user.uid), {
+      fullName: name,
       age,
       height,
       weight,
@@ -174,7 +174,7 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   dropdownHeader: {
-    backgroundColor: '#E5E5E5',
+    backgroundColor: '#A79692',
     padding: 15,
     borderRadius: 12,
     flexDirection: 'row',

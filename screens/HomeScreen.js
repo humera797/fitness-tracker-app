@@ -9,16 +9,16 @@ import Slider from '@react-native-community/slider';
 import Feather from '@expo/vector-icons/Feather';
 import Octicons from '@expo/vector-icons/Octicons';
 import ReminderPopover from '../components/ReminderPopover';
-import { getTodayReminder, hasSeenTodayReminder, markReminderSeen } from '../utils/reminders';
-import { getWorkoutForDate, getCompletedWorkoutDates } from '../utils/workoutPlan';
-import { checkAndAwardBadges, calculateStreak, getTotalWorkouts, getTotalCalories, getTotalWater, getTotalMinutes } from '../utils/gamification';
+import { getTodayReminder, hasSeenTodayReminder, markReminderSeen } from '../services/reminders';
+import { getWorkoutForDate, getCompletedWorkoutDates } from '../services/workoutPlan';
+import { checkAndAwardBadges, calculateStreak, getTotalWorkouts, getTotalCalories, getTotalWater, getTotalMinutes } from '../services/gamification';
 import { useFocusEffect } from '@react-navigation/native';
 import { auth, db } from '../firebase';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 
 export default function HomeScreen({ navigation }) {
 
-    const today = new Date().toISOString().split('T')[0];
+    const today = new Date().toLocaleDateString('en-CA');
     const [username, setUsername] = useState('');
     const [selectedDate, setSelectedDate] = useState(today);
     const [calories, setCalories] = useState(0);
@@ -31,12 +31,12 @@ export default function HomeScreen({ navigation }) {
     const [todayWorkout, setTodayWorkout] = useState(null);
     const [selectedDateWorkout, setSelectedDateWorkout] = useState(null);
     const [completedDates, setCompletedDates] = useState({});
-
     const [todaysReminder, setTodaysReminder] = useState(null);
     const [showReminder, setShowReminder] = useState(false);
     const [hasNewReminder, setHasNewReminder] = useState(false);
     const [showBellPopover, setShowBellPopover] = useState(false);
     const [todaysReminderForBell, setTodaysReminderForBell] = useState(null);
+    const [isCheckingBadges, setIsCheckingBadges] = useState(false);
 
     const userId = auth.currentUser?.uid;
 
@@ -57,6 +57,7 @@ export default function HomeScreen({ navigation }) {
             loadTodayProgress();
             loadWorkoutsCount();
             loadWeeklyWeightData();
+            loadCompletedDates();
         }, [])
     );
 
@@ -66,7 +67,7 @@ export default function HomeScreen({ navigation }) {
         const docSnap = await getDoc(docRef);
         if (docSnap.exists()) {
             const data = docSnap.data();
-            setUsername(data.name || 'User');
+            setUsername(data.fullName || data.name);
             if (data.weight) {
                 setWeight(data.weight);
                 const minW = Math.max(40, data.weight - 5);
@@ -183,6 +184,8 @@ export default function HomeScreen({ navigation }) {
     };
 
     const checkForBadges = async () => {
+        if (isCheckingBadges) return;
+        setIsCheckingBadges(true);
         const streak = await calculateStreak();
         const totalWorkouts = await getTotalWorkouts();
         const totalCalories = await getTotalCalories();
@@ -202,13 +205,16 @@ export default function HomeScreen({ navigation }) {
             const badgeNames = newBadges.map(b => `${b.icon} ${b.name}`).join('\n');
             Alert.alert('NEW ACHIEVEMENT UNLOCKED! 🎉', badgeNames);
         }
+        setIsCheckingBadges(false);
     };
 
     const addCalories = async () => {
         const newValue = calories + 10;
         setCalories(newValue);
         await saveDailyProgress(newValue, minutes, water);
+        if (newValue % 5 === 0) {
         await checkForBadges();
+        }
     };
 
     const removeCalories = async () => {
@@ -221,7 +227,9 @@ export default function HomeScreen({ navigation }) {
         const newValue = minutes + 5;
         setMinutes(newValue);
         await saveDailyProgress(calories, newValue, water);
+        if (newValue % 5 === 0) {
         await checkForBadges();
+        }
     };
 
     const removeMinutes = async () => {
@@ -234,7 +242,9 @@ export default function HomeScreen({ navigation }) {
         const newValue = water + 1;
         setWater(newValue);
         await saveDailyProgress(calories, minutes, newValue);
+        if (newValue % 5 === 0) {
         await checkForBadges();
+        }
     };
 
     const removeWater = async () => {
@@ -305,17 +315,17 @@ export default function HomeScreen({ navigation }) {
     };
 
     const loadCompletedDates = async () => {
-    const dates = await getCompletedWorkoutDates();
-    const marked = {};
-    dates.forEach(date => {
-        marked[date] = { 
-            selected: true,           
-            selectedColor: '#554440', 
-            selectedTextColor: '#ffffff'
-        };
-    });
-    setCompletedDates(marked);
-};
+        const dates = await getCompletedWorkoutDates();
+        const marked = {};
+        dates.forEach(date => {
+            marked[date] = {
+                marked: true,
+                dotColor: '#554440',
+                selectedTextColor: '#ffffff'
+            };
+        });
+        setCompletedDates(marked);
+    };
 
     const formatDate = (dateString) => {
         const [year, month, day] = dateString.split('-');
@@ -408,7 +418,7 @@ export default function HomeScreen({ navigation }) {
                 </View>
 
                 <View style={styles.activityCard}>
-                    <Text>Water intake</Text>
+                    <Text>Water intake (glasses)</Text>
                     <View style={styles.counter}>
                         <TouchableOpacity onPress={removeWater} style={styles.circle}>
                             <Text>-</Text>
@@ -518,8 +528,8 @@ export default function HomeScreen({ navigation }) {
                     />
 
                     <View style={styles.weightRange}>
-                        <Text style={styles.rangeText}>{weightRange.max} kg</Text>
                         <Text style={styles.rangeText}>{weightRange.min} kg</Text>
+                        <Text style={styles.rangeText}>{weightRange.max} kg</Text>
                     </View>
                 </View>
             </ScrollView>
@@ -546,7 +556,7 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
     },
     greeting: {
-        fontSize: 28,
+        fontSize: 24,
         fontWeight: '500',
         left: 15,
     },

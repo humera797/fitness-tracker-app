@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { completeWorkout } from '../utils/workoutPlan';
+import { completeWorkout } from '../services/workoutPlan';
 
 export default function WorkoutPlanScreen({ navigation, route }) {
     const { date, exercises, planName, isCompleted } = route.params;

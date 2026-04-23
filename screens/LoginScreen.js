@@ -1,15 +1,52 @@
 // Login Screen - Allows users to log in to their account
 
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, Alert, Image } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, TextInput, TouchableOpacity, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { auth } from '../firebase';
 import { signInWithEmailAndPassword } from 'firebase/auth';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function LoginScreen({ navigation }) {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [loading, setLoading] = useState(false);
+
+    useEffect(() => {
+        checkLoggedInStatus();
+    }, []);
+
+    const checkLoggedInStatus = async () => {
+        try {
+            const userLoggedIn = await AsyncStorage.getItem('userLoggedIn');
+            const userEmail = await AsyncStorage.getItem('userEmail');
+
+            console.log('Checking login status - logged in:', userLoggedIn);
+            console.log('Checking login status - email:', userEmail);
+
+            if (userLoggedIn === 'true' && userEmail) {
+                console.log('User was previously logged in, redirecting to Home');
+                navigation.replace('Home');
+            }
+        } catch (error) {
+            console.log('Error checking login status:', error);
+        }
+    };
+
+    const loadSavedUserData = async (user) => {
+        try {
+            await AsyncStorage.setItem('userLoggedIn', 'true');
+            await AsyncStorage.setItem('userEmail', user.email);
+            await AsyncStorage.setItem('userUID', user.uid);
+            await AsyncStorage.setItem('lastLoginTime', new Date().toISOString());
+
+            console.log('User data saved successfully');
+            return true;
+        } catch (error) {
+            console.log('Error saving user data:', error);
+            return false;
+        }
+    };
 
     const handleLogin = async () => {
         if (!email || !password) {
@@ -19,7 +56,11 @@ export default function LoginScreen({ navigation }) {
 
         setLoading(true);
         try {
-            await signInWithEmailAndPassword(auth, email, password);
+            const userCredential = await signInWithEmailAndPassword(auth, email, password);
+            const user = userCredential.user;
+
+            await loadSavedUserData(user);
+
             navigation.replace('Home');
         } catch (error) {
             let errorMessage = 'Login failed';
@@ -31,7 +72,6 @@ export default function LoginScreen({ navigation }) {
                 errorMessage = 'Invalid email address';
             }
             Alert.alert('Login Failed', errorMessage);
-        } finally {
             setLoading(false);
         }
     };
@@ -48,6 +88,7 @@ export default function LoginScreen({ navigation }) {
             <TextInput
                 style={styles.input}
                 placeholder="Enter your email"
+                placeholderTextColor='#666666'
                 value={email}
                 onChangeText={setEmail}
                 keyboardType="email-address"
@@ -58,6 +99,7 @@ export default function LoginScreen({ navigation }) {
             <TextInput
                 style={styles.input}
                 placeholder="Enter your password"
+                placeholderTextColor='#666666'
                 value={password}
                 onChangeText={setPassword}
                 secureTextEntry
@@ -82,7 +124,7 @@ export default function LoginScreen({ navigation }) {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: 'white',
+        backgroundColor: '#C3B2AE',
         padding: 30,
         justifyContent: 'center',
     },
@@ -107,7 +149,7 @@ const styles = StyleSheet.create({
         borderRadius: 8,
         padding: 12,
         marginTop: 8,
-        backgroundColor: '#f0eded',
+        backgroundColor: '#A79692',
     },
     bottomtextcontainer: {
         marginTop: 20,

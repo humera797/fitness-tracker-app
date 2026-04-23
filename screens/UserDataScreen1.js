@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, TextInput } from 'react-native';
 
 export default function UserDataScreen1({ navigation }) {
 
+  const [name, setName] = useState('');
   const [age, setAge] = useState('');
   const [height, setHeight] = useState('');
   const [weight, setWeight] = useState('');
@@ -66,6 +67,17 @@ export default function UserDataScreen1({ navigation }) {
 
       <Text style={styles.header}>Let's Get To Know You</Text>
 
+      <View style={styles.inputContainer}>
+        <Text style={styles.label}>Full Name</Text>
+        <TextInput
+          style={styles.textInput}
+          placeholder="Enter your full name"
+          placeholderTextColor='#666666'
+          value={name}
+          onChangeText={setName}
+        />
+      </View>
+
       {renderDropdown(
         'Age',
         age,
@@ -97,11 +109,19 @@ export default function UserDataScreen1({ navigation }) {
 
       <TouchableOpacity
         style={styles.button}
-        onPress={() => navigation.navigate('UserData2', {
-          age: age,
-          height: height,
-          weight: weight,
-        })}
+        onPress={() => {
+          if (!name.trim()) {
+            alert("Please enter your full name");
+            return;
+          }
+
+          navigation.navigate('UserData2', {
+            name: name,
+            age: age,
+            height: height,
+            weight: weight,
+          })
+        }}
       >
         <Text style={styles.buttonText}>Next</Text>
       </TouchableOpacity>
@@ -123,6 +143,17 @@ const styles = StyleSheet.create({
     color: 'black',
     left: 50,
   },
+  inputContainer: {
+    marginBottom: 23,
+  },
+  textInput: {
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 8,
+    padding: 12,
+    marginTop: 8,
+    backgroundColor: '#A79692',
+  },
 
   dropdowncontainer: {
     marginBottom: 23,
@@ -134,7 +165,7 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   dropdownHeader: {
-    backgroundColor: '#E5E5E5',
+    backgroundColor: '#A79692',
     padding: 15,
     borderRadius: 12,
     flexDirection: 'row',

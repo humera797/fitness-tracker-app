@@ -4,7 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { auth, db } from '../firebase';
 import { doc, updateDoc, arrayUnion, arrayRemove, getDoc, setDoc } from 'firebase/firestore';
 import Entypo from '@expo/vector-icons/Entypo';
-import { checkAndAwardBadges, calculateStreak, getTotalWorkouts, getTotalCalories, getTotalMinutes, getTotalWater } from '../utils/gamification';
+import { checkAndAwardBadges, calculateStreak, getTotalWorkouts, getTotalCalories, getTotalMinutes, getTotalWater } from '../services/gamification';
 
 export default function DetailScreen({ route, navigation }) {
     const { exercise, area } = route.params;
@@ -170,7 +170,7 @@ export default function DetailScreen({ route, navigation }) {
                 </View>
 
                 <TouchableOpacity style={styles.completeButton} onPress={handleCompleteWorkout}>
-                    <Text style={styles.completeButtonText}>Workout Complete</Text>
+                    <Text style={styles.completeButtonText}>Exercise Complete</Text>
                 </TouchableOpacity>
             </ScrollView>
         </SafeAreaView>

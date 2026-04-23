@@ -85,16 +85,6 @@ const styles = StyleSheet.create({
         backgroundColor: '#C3B2AE',
         padding: 20,
     },
-    backButton: {
-        position: 'absolute',
-        top: 50,
-        left: 20,
-        zIndex: 1,
-    },
-    backText: {
-        fontSize: 16,
-        fontWeight: '500',
-    },
     header: {
         fontSize: 23,
         fontWeight: '700',
@@ -148,5 +138,14 @@ const styles = StyleSheet.create({
         textAlign: 'center',
         marginTop: 10,
         bottom: 100
+    },
+    backButton: {
+        position: 'absolute',
+        top: 50,
+        left: 20,
+    },
+    backText: {
+        fontSize: 16,
+        fontWeight: '500',
     },
 });

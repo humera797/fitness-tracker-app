@@ -4,7 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { LineChart } from 'react-native-gifted-charts';
 import { auth, db } from '../firebase';
 import { doc, getDoc, collection, getDocs, query, orderBy, limit } from 'firebase/firestore';
-import { getEarnedBadges } from '../utils/gamification';
+import { getEarnedBadges } from '../services/gamification';
 
 export default function ActivityScreen({ navigation }) {
     const [activeMinutesData, setActiveMinutesData] = useState([]);

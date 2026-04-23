@@ -37,8 +37,6 @@ export default function ExerciseListScreen({ route, navigation }) {
         </TouchableOpacity>
 
         <Text style={styles.header}>Filtered Exercises</Text>
-        <Text style={styles.count}>({filteredExercises.length} exercises)</Text>
-
         <FlatList
           data={filteredExercises}
           keyExtractor={(item) => item.id}

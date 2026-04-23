@@ -37,16 +37,11 @@ export default function SignupScreen({ navigation }) {
 
             <Text style={styles.header}>Welcome, lets get started</Text>
 
-            <Text style={styles.label}>Full Name</Text>
-            <TextInput
-                style={styles.input}
-                placeholder="enter full name"
-            />
-
             <Text style={styles.label}>Email</Text>
             <TextInput
                 style={styles.input}
                 placeholder="enter email"
+                placeholderTextColor='#666666'
                 onChangeText={setEmail}
             />
 
@@ -54,6 +49,7 @@ export default function SignupScreen({ navigation }) {
             <TextInput
                 style={styles.input}
                 placeholder="create a password"
+                placeholderTextColor='#666666'
                 secureTextEntry
                 onChangeText={setPassword}
             />
@@ -62,6 +58,7 @@ export default function SignupScreen({ navigation }) {
             <TextInput
                 style={styles.input}
                 placeholder="confirm your password"
+                placeholderTextColor='#666666'
                 secureTextEntry
                 onChangeText={setConfirmPassword}
             />
@@ -87,7 +84,7 @@ export default function SignupScreen({ navigation }) {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: 'white',
+        backgroundColor: '#C3B2AE',
         padding: 30,
         justifyContent: 'center',
     },
@@ -126,7 +123,7 @@ const styles = StyleSheet.create({
         borderRadius: 8,
         padding: 12,
         marginTop: 8,
-        backgroundColor: '#f0eded',
+        backgroundColor: '#A79692',
     },
 
     button: {

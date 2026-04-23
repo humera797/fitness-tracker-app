@@ -7,6 +7,7 @@ import Entypo from '@expo/vector-icons/Entypo';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { auth, db } from '../firebase';
 import { doc, getDoc } from 'firebase/firestore';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function ProfileScreen({ navigation }) {
     const [userData, setUserData] = useState(null);
@@ -39,9 +40,27 @@ export default function ProfileScreen({ navigation }) {
         Alert.alert('Logout', 'Are you sure you want to logout?', [
             { text: 'Cancel', style: 'cancel' },
             {
-                text: 'Logout', style: 'destructive', onPress: async () => {
-                    await auth.signOut();
-                    navigation.replace('Welcome');
+                text: 'Logout',
+                style: 'destructive',
+                onPress: async () => {
+                    try {
+                        await AsyncStorage.removeItem('userLoggedIn');
+                        await AsyncStorage.removeItem('userEmail');
+                        await AsyncStorage.removeItem('userUID');
+                        await AsyncStorage.removeItem('lastLoginTime');
+
+                        console.log('AsyncStorage cleared');
+
+                        await auth.signOut();
+
+                        console.log('User signed out');
+
+                        navigation.replace('Welcome');
+
+                    } catch (error) {
+                        console.log('Logout error:', error);
+                        Alert.alert('Error', 'Could not logout. Please try again.');
+                    }
                 }
             }
         ]);
@@ -55,7 +74,7 @@ export default function ProfileScreen({ navigation }) {
                     <FontAwesome name="user-circle" size={60} color="#a48b85" />
                 </View>
                 <View>
-                    <Text style={styles.name}>{userData?.name || 'User'}</Text>
+                    <Text style={styles.name}>{userData?.fullName || userData?.name }</Text>
                     <Text style={styles.email}>{userEmail}</Text>
                 </View>
             </View>

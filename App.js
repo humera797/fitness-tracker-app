@@ -18,6 +18,7 @@ import ActivityScreen from './screens/ActivityScreen';
 import FavouritesScreen from './screens/FavouritesScreen';
 import HistoryScreen from './screens/HistoryScreen';
 import WorkoutPlanScreen from './screens/WorkoutPlanScreen';
+import SplashScreen from './screens/SplashScreen';
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -26,6 +27,7 @@ export default function App() {
   return (
     <NavigationContainer>
       <Stack.Navigator screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="Splash" component={SplashScreen} />
         <Stack.Screen name="Welcome" component={WelcomeScreen} />
         <Stack.Screen name="Login" component={LoginScreen} />
         <Stack.Screen name="Signup" component={SignupScreen} />
@@ -39,6 +41,7 @@ export default function App() {
         <Stack.Screen name="Favourites" component={FavouritesScreen} />
         <Stack.Screen name="History" component={HistoryScreen} />
         <Stack.Screen name="WorkoutPlan" component={WorkoutPlanScreen} />
+
       </Stack.Navigator>
     </NavigationContainer>
   );
