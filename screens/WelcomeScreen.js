@@ -1,5 +1,3 @@
-// WelcomeScreen - The first screen user see when they open the app, with options to navigate to Login or Signup
-
 import React from 'react';
 import { View, Text, StyleSheet, Image, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';

@@ -9,7 +9,7 @@ import { auth, db } from '../firebase';
 import { doc, getDoc } from 'firebase/firestore';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-export default function ProfileScreen({ navigation }) {
+export default function UserProfileScreen({ navigation }) {
     const [userData, setUserData] = useState(null);
     const [userEmail, setUserEmail] = useState('');
     const [loading, setLoading] = useState(true);

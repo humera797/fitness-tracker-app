@@ -1,5 +1,3 @@
-// Home Screen - Displays user's fitness data and allows them to log out
-
 import React, { useState, useEffect, useCallback } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -19,13 +17,14 @@ import { doc, getDoc, setDoc } from 'firebase/firestore';
 export default function HomeScreen({ navigation }) {
 
     const today = new Date().toLocaleDateString('en-CA');
+    // all the state variables, it keeps track of everything the user does on the home screen 
     const [username, setUsername] = useState('');
     const [selectedDate, setSelectedDate] = useState(today);
     const [calories, setCalories] = useState(0);
     const [minutes, setMinutes] = useState(0);
     const [water, setWater] = useState(0);
     const [workouts, setWorkouts] = useState(0);
-    const [weight, setWeight] = useState(69);
+    const [weight, setWeight] = useState(60);
     const [weightData, setWeightData] = useState([]);
     const [weightRange, setWeightRange] = useState({ min: 60, max: 80 });
     const [todayWorkout, setTodayWorkout] = useState(null);
@@ -38,8 +37,10 @@ export default function HomeScreen({ navigation }) {
     const [todaysReminderForBell, setTodaysReminderForBell] = useState(null);
     const [isCheckingBadges, setIsCheckingBadges] = useState(false);
 
+    // get the current users uid from firebase auth
     const userId = auth.currentUser?.uid;
 
+    // this is used to fetch all user data when the home screen loads
     useEffect(() => {
         loadUserData();
         loadTodayProgress();
@@ -52,6 +53,7 @@ export default function HomeScreen({ navigation }) {
         setSelectedDate(today);
     }, []);
 
+    // reload data every time the user comes back to the screen 
     useFocusEffect(
         useCallback(() => {
             loadTodayProgress();
@@ -61,6 +63,7 @@ export default function HomeScreen({ navigation }) {
         }, [])
     );
 
+    // get the users name and weight from firestore 
     const loadUserData = async () => {
         if (!userId) return;
         const docRef = doc(db, 'users', userId);
@@ -76,6 +79,7 @@ export default function HomeScreen({ navigation }) {
             }
         }
     };
+    // this loads users weight data for the last 7 days and shows on the chart
     const loadWeeklyWeightData = async () => {
         if (!userId) return;
         try {
@@ -88,6 +92,7 @@ export default function HomeScreen({ navigation }) {
             const monday = new Date(todayDate);
             monday.setDate(todayDate.getDate() - daysToMonday);
 
+            // loop through each day and fetch weight data if there is no weight data, it uses the current weight 
             for (let i = 0; i < 7; i++) {
                 const date = new Date(monday);
                 date.setDate(monday.getDate() + i);
@@ -129,6 +134,7 @@ export default function HomeScreen({ navigation }) {
         }
     };
 
+    // this loads the todays saved progess for calories, minutes and water intake 
     const loadTodayProgress = async () => {
         if (!userId) return;
         const todayStr = new Date().toISOString().split('T')[0];
@@ -142,6 +148,7 @@ export default function HomeScreen({ navigation }) {
         }
     };
 
+    // this loads how many workouts the user has completed today
     const loadWorkoutsCount = async () => {
         if (!userId) return;
         const todayStr = new Date().toISOString().split('T')[0];
@@ -154,6 +161,7 @@ export default function HomeScreen({ navigation }) {
         }
     };
 
+    // this saves the users daily progress 
     const saveDailyProgress = async (newCalories, newMinutes, newWater) => {
         if (!userId) return;
         const todayStr = new Date().toISOString().split('T')[0];
@@ -166,23 +174,7 @@ export default function HomeScreen({ navigation }) {
         }, { merge: true });
     };
 
-    const saveWeight = async () => {
-        if (!userId) return;
-        const todayStr = new Date().toISOString().split('T')[0];
-        const weightRef = doc(db, 'users', userId, 'weightHistory', todayStr);
-        await setDoc(weightRef, {
-            weight: weight,
-            date: todayStr
-        });
-
-        await setDoc(doc(db, 'users', userId), {
-            weight: weight
-        }, { merge: true });
-
-        Alert.alert('Weight Saved', `Your weight ${weight} kg has been recorded`);
-        loadWeeklyWeightData();
-    };
-
+    // this checks if the user has earned any new badges 
     const checkForBadges = async () => {
         if (isCheckingBadges) return;
         setIsCheckingBadges(true);
@@ -213,7 +205,7 @@ export default function HomeScreen({ navigation }) {
         setCalories(newValue);
         await saveDailyProgress(newValue, minutes, water);
         if (newValue % 5 === 0) {
-        await checkForBadges();
+            await checkForBadges();
         }
     };
 
@@ -228,7 +220,7 @@ export default function HomeScreen({ navigation }) {
         setMinutes(newValue);
         await saveDailyProgress(calories, newValue, water);
         if (newValue % 5 === 0) {
-        await checkForBadges();
+            await checkForBadges();
         }
     };
 
@@ -243,7 +235,7 @@ export default function HomeScreen({ navigation }) {
         setWater(newValue);
         await saveDailyProgress(calories, minutes, newValue);
         if (newValue % 5 === 0) {
-        await checkForBadges();
+            await checkForBadges();
         }
     };
 
@@ -253,6 +245,7 @@ export default function HomeScreen({ navigation }) {
         await saveDailyProgress(calories, minutes, newValue);
     };
 
+    // when user taps on a different date on the calendar data is loaded for that date
     const loadDataForDate = async (date) => {
         if (!userId) return;
         const docRef = doc(db, 'users', userId, 'dailyProgress', date);
@@ -275,11 +268,13 @@ export default function HomeScreen({ navigation }) {
         await loadWorkoutForSelectedDate(newDate);
     };
 
+    // loads the workout plan for the selecetd date 
     const loadWorkoutForSelectedDate = async (date) => {
         const workout = await getWorkoutForDate(date);
         setSelectedDateWorkout(workout);
     };
 
+    // this loads the todays workout plan 
     const loadTodayWorkout = async () => {
         const todayStr = new Date().toISOString().split('T')[0];
         const workout = await getWorkoutForDate(todayStr);
@@ -314,6 +309,7 @@ export default function HomeScreen({ navigation }) {
         }
     };
 
+    // this gets all the dates where user completed a workout
     const loadCompletedDates = async () => {
         const dates = await getCompletedWorkoutDates();
         const marked = {};
@@ -332,6 +328,7 @@ export default function HomeScreen({ navigation }) {
         return `${day}/${month}/${year}`;
     };
 
+    // this check if the user has seen the rmeinder snd if not it shows the reminder popup
     const checkAndShowReminder = async () => {
         const seen = await hasSeenTodayReminder();
         if (!seen) {
@@ -344,6 +341,7 @@ export default function HomeScreen({ navigation }) {
             }
         }
     };
+    // this open the bell icon popover
     const openBellPopover = async () => {
         const reminder = await getTodayReminder();
         setTodaysReminderForBell(reminder);
@@ -624,6 +622,10 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         gap: 15
+    },
+    workoutCount: {
+        fontSize: 18,
+        fontWeight: '600',
     },
 
     circle: {

@@ -2,26 +2,23 @@ import { auth, db } from '../firebase';
 import { doc, getDoc, setDoc, collection, getDocs } from 'firebase/firestore';
 import { exercisesData } from '../data/exercises';
 
-async function getUserGoalAndBMI() {
+export async function getWorkoutPlanName() {
     const userId = auth.currentUser?.uid;
-    if (!userId) return { goal: 'Maintain Weight', bmi: 22 };
+    if (!userId) return 'General Fitness Plan';
 
     const userDoc = await getDoc(doc(db, 'users', userId));
     if (userDoc.exists()) {
         const data = userDoc.data();
+        if (data.recommendedPlan) {
+            return data.recommendedPlan;
+        }
+
         const goal = data.targetGoal || 'Maintain Weight';
-        const bmi = data.bmi || 22;
-        return { goal, bmi };
+        const bmi = parseFloat(data.bmi) || 22;
+        if (goal === 'Lose Weight' && bmi >= 25) return 'Fat Loss Workout';
+        if (goal === 'Gain Muscle') return 'Strength Training Plan';
+        if (goal === 'Maintain Weight') return 'Balanced Fitness Plan';
     }
-    return { goal: 'Maintain Weight', bmi: 22 };
-}
-
-export async function getWorkoutPlanName() {
-    const { goal, bmi } = await getUserGoalAndBMI();
-
-    if (goal === 'Lose Weight' && bmi >= 25) return 'Fat Loss Workout';
-    if (goal === 'Gain Muscle') return 'Strength Training Plan';
-    if (goal === 'Maintain Weight') return 'Balanced Fitness Plan';
     return 'General Fitness Plan';
 }
 

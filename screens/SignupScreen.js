@@ -1,5 +1,3 @@
-// Signup screen - Allows users to create a new account by entering their details
-
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, TextInput } from 'react-native';
 import { createUserWithEmailAndPassword } from 'firebase/auth';

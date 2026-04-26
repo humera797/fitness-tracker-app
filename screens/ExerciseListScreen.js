@@ -15,7 +15,7 @@ export default function ExerciseListScreen({ route, navigation }) {
   };
 
   console.log('Showing filtered exercises');
-
+// when user applies filters it shows the filtered exercises list 
   if (filters) {
     const allExercises = [
       ...exercisesData.FULLBODY,
@@ -56,6 +56,7 @@ export default function ExerciseListScreen({ route, navigation }) {
     );
   }
 
+  // when user clicks on workout plan it shows workout plan exercise list 
   if (workoutPlan) {
     const allExercises = [
       ...exercisesData.FULLBODY,
@@ -111,6 +112,7 @@ export default function ExerciseListScreen({ route, navigation }) {
     );
   }
 
+  // when user selects any target area it shows exercise list for that area
   const data = exercisesData[area] || [];
 
   return (
